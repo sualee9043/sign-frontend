@@ -1,0 +1,62 @@
+.container {
+  display: flex;
+  justify-content: center;
+  height: 90vh;
+  flex-direction: column;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 2;
+  align-items: center;
+  justify-content: center;
+}
+
+.label {
+  font-size: 26px;
+  margin: 0;
+}
+
+.input {
+  font-size: 20px;
+  color: white;
+  text-align: center;
+  margin: 40px 0 50px 0;
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px solid #ccc;
+}
+
+.errorMsg {
+  margin-top: 20px;
+  color: tomato;
+}
+
+.hidden {
+  display: none;
+}
+
+.message-container {
+  background-color: rgba(48, 48, 48, 0.9);
+  position: absolute;
+  width: 100%;
+  height: 90%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.message {
+  font-size: 20px;
+}
+
+.button-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.button-wrapper > button {
+  position: static;
+}

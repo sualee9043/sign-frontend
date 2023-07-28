@@ -1,0 +1,40 @@
+.right {
+  text-align: right;
+}
+
+.left {
+  text-align: left;
+}
+
+.wrapper {
+  position: relative;
+  height: 100%;
+  display: block;
+}
+
+.classroom {
+  position: absolute;
+}
+
+.container {
+  height: 85vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.colors {
+  display: inline-block;
+}
+
+.expression-wrapper {
+  width: 340px;
+  min-height: 80px;
+  margin-top: 20px;
+}
+
+.width300 {
+  width: 300px;
+}

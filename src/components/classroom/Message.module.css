@@ -1,0 +1,36 @@
+.sender {
+  font-weight: bold;
+  margin-right: 10px;
+  display: block;
+}
+
+.sentTime {
+  margin: 0 10px;
+  font-size: 13px;
+}
+
+.msgWrapper {
+  width: 100%;
+  height: auto;
+}
+
+.message {
+  display: inline-block;
+  word-wrap: break-word;
+  border-radius: 13px;
+  background-color: white;
+  width: 200px;
+  height: auto;
+  color: black;
+  padding: 8px 10px;
+  margin: 10px auto;
+  text-align: left;
+}
+
+.right {
+  text-align: right;
+}
+
+.left {
+  text-align: left;
+}

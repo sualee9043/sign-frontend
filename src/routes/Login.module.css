@@ -1,0 +1,87 @@
+.wrapper {
+  height: 90vh;
+  display: flex;
+  align-items: center;
+}
+
+.login {
+  width: 100%;
+  /* display: table-cell;
+  vertical-align: middle; */
+}
+
+.loginText {
+  font-size: 30px;
+  font-weight: 250;
+}
+
+.input {
+  font-size: 18px;
+  line-height: 1.5;
+  color: rgb(12, 12, 12);
+  display: block;
+  width: 70%;
+  background: #e6e6e6;
+  height: 50px;
+  border-radius: 25px;
+  padding: 0 30px 0 30px;
+  margin: 20px auto;
+  border: none;
+}
+
+.login-button {
+  font-size: 18px;
+  font-weight: 200;
+  line-height: 1.5;
+  display: block;
+  width: 85%;
+  height: 50px;
+  border-radius: 25px;
+  padding: 0 30px 0 30px;
+  margin: 20px auto;
+  border: none;
+}
+
+.login-button-blue {
+  color: white;
+  background: #0289b1;
+}
+
+.login-button-blue:hover {
+  background: #0ca2d0;
+  transition: 0.4s;
+  cursor: pointer;
+}
+
+.errorMsg {
+  margin: 20px auto;
+  color: tomato;
+}
+
+.input-error {
+  color: tomato;
+}
+
+.disabled {
+  background: #5eafc7;
+}
+
+.login-kakao:hover {
+  background: rgb(255, 255, 61);
+  transition: 0.4s;
+  cursor: pointer;
+}
+
+.login-kakao {
+  background: yellow;
+  color: black;
+}
+
+.login-google {
+  background: tomato;
+  color: white;
+}
+.login-google:hover {
+  transition: 0.4s;
+  background: rgb(255, 111, 85);
+}

@@ -1,0 +1,23 @@
+.msgContainer {
+  height: 85%;
+  overflow-y: scroll;
+  padding: 0px;
+  margin-top: 0px;
+}
+
+.msgContainer hr {
+  border: 1px solid rgba(255, 255, 255, 0.219);
+}
+
+.announcWrapper {
+  padding: 15px 0;
+}
+
+.announcement {
+  font-size: 13px;
+  background: #0289b191;
+  border-radius: 5px;
+  padding: 0 13px 0 15px;
+  color: white;
+  margin-bottom: 20px;
+}

@@ -1,0 +1,46 @@
+* {
+  font-family: "IBM Plex Sans KR", sans-serif;
+}
+
+a {
+  color: white;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: none;
+}
+
+@media (min-width: 768px) {
+  body {
+    width: 768px;
+  }
+}
+
+@media (max-width: 767px) {
+  body {
+    width: 100vw;
+  }
+}
+
+body {
+  text-align: center;
+  background: rgb(48, 48, 48);
+  color: white;
+  margin: auto;
+}
+
+div {
+  text-align: center;
+}
+
+#root {
+  margin: auto;
+}
+
+.rooms {
+  text-align: left;
+}
+
+#root {
+  padding: 35px 20px;
+}

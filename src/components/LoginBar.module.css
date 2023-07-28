@@ -1,0 +1,38 @@
+.loginbar {
+  text-align: right;
+}
+
+.logout {
+  color: white;
+  padding: 20px 20px 0px 0px;
+}
+
+.user {
+}
+
+.user-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.default-img {
+}
+
+.profile-wrapper {
+  position: relative;
+}
+
+.profile-img {
+  z-index: 1;
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  margin-left: 10px;
+}

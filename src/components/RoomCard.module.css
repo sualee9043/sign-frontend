@@ -1,0 +1,60 @@
+.card {
+  display: inline-block;
+  border-radius: 13px;
+  background-color: white;
+  width: 85%;
+  height: auto;
+  color: black;
+  padding: 15px 20px;
+  margin: 10px 0px;
+}
+
+.container {
+  display: flex;
+}
+
+.roomName {
+  font-size: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.roomName-input {
+  font-size: 30px;
+  border: none;
+  flex-grow: 1;
+}
+
+.input-wrapper {
+  flex-grow: 1;
+}
+
+.buttons {
+  float: right;
+  display: flex;
+  flex-direction: column;
+}
+
+.roomInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* align-items: flex-start; */
+  flex-grow: 1;
+}
+
+.roomInfo-detail {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-right: 5px;
+}
+
+.host {
+  text-align: left;
+}
+
+.edit-icon {
+  margin-left: 5px;
+}

@@ -1,0 +1,15 @@
+.left {
+  text-align: left;
+}
+
+.right {
+  text-align: right;
+}
+
+.center {
+  font-size: large;
+}
+
+.button-wrapper button {
+  margin-left: 10px;
+}

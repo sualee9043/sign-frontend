@@ -1,0 +1,39 @@
+.btn {
+  display: inline-block;
+  padding: 6px 20px;
+  font-size: 23px;
+  font-weight: 400;
+  line-height: 1.42857143;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: white;
+  margin: 0 10px;
+}
+
+.room {
+  background-color: #0289b1;
+  border-color: #0289b1;
+}
+
+.delete {
+  color: red;
+  background-color: rgb(239, 239, 239);
+}
+
+.edit {
+  color: white;
+  background-color: gray;
+}
+.enter {
+  color: white;
+  background-color: #e6c403;
+}
+
+.start {
+  background-color: #0289b1;
+  font-size: 40px;
+  font-weight: 500;
+}

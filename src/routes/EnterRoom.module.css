@@ -1,0 +1,38 @@
+.container {
+  display: table;
+  width: -webkit-fill-available;
+  height: 90vh;
+}
+
+.container > div {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.label {
+  font-size: 30px;
+  margin: 0;
+}
+
+.input {
+  font-size: 20px;
+  color: white;
+  text-align: center;
+  margin: 40px 0 50px 0;
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px solid #ccc;
+}
+
+.errorMsg {
+  width: 70%;
+  padding: 10px;
+  margin: 20px auto;
+  border: solid 1px white;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.178);
+}
+
+.room {
+  margin-top: 20px;
+}
