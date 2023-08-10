@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import NavLinkButton from "../components/NavLinkButton.js";
-import { Link } from "react-router-dom";
-import LoginBar from "../components/LoginBar.js";
-import { RoomCard } from "../components/RoomCard.js";
-import styles from "./Home.module.css";
-import { useParams } from "react-router-dom";
-import { useContext } from "react";
-import { CurrentUserContext } from "../contexts/CurrentUserContext";
-import theme from "../utils/theme";
+import { Link, useParams } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import Button from "@mui/material/Button";
+
+import LoginBar from "../components/LoginBar.js";
+import { RoomCard } from "../components/RoomCard.js";
+
+import { CurrentUserContext } from "../contexts/CurrentUserContext";
+import theme from "../utils/theme";
+import styles from "./Home.module.css";
+
 
 function Home() {
   const { currentUser } = useContext(CurrentUserContext);

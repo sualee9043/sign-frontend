@@ -1,5 +1,6 @@
 import styles from "./Emoji.module.css";
 
+
 export default function Emoji({ emoji, previousEmoji, selectEmoji }) {
   return (
     <span

@@ -1,5 +1,7 @@
 import React from "react";
+
 import styles from "./Circle.module.css";
+
 
 function ColorCircle({ color, selectColor }) {
   return (

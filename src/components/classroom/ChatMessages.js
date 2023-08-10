@@ -1,8 +1,11 @@
 import { useContext, useEffect, useRef } from "react";
+
 import Message from "./Message";
-import styles from "./ChatMessages.module.css";
+
 import { CurrentUserContext } from "../../contexts/CurrentUserContext";
 import { EVENT } from "../../utils/classroomUtils";
+import styles from "./ChatMessages.module.css";
+
 
 function ChatMessages({ chat, stateRef }) {
   const { currentUser } = useContext(CurrentUserContext);
@@ -36,11 +39,13 @@ function ChatMessages({ chat, stateRef }) {
               </div>
             );
           case EVENT.TALK:
-            return stateRef.current == data.seatNum ? (
+            return stateRef.current === data.seatNum ? (
               <Message key={index} myMessage={true} data={data}></Message>
             ) : (
               <Message key={index} myMessage={false} data={data}></Message>
             );
+          default:
+            return null;
         }
       })}
     </ul>

@@ -1,6 +1,8 @@
-import styles from "./NavBar.module.css";
-import { MdArrowBack, MdQuestionAnswer } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import { MdArrowBack, MdQuestionAnswer } from "react-icons/md";
+
+import styles from "./NavBar.module.css";
+
 
 function NavBar({ mode, roomName, leftButtonHandler, rightButtonHandler }) {
   const navigate = useNavigate();
@@ -18,7 +20,7 @@ function NavBar({ mode, roomName, leftButtonHandler, rightButtonHandler }) {
           <MdArrowBack size="40" />
         </span>
       </div>
-      {mode == "classroom" ? <span>{roomName}</span> : null}
+      {mode === "classroom" ? <span>{roomName}</span> : null}
       <div className={styles.right}>
         {mode == "classroom" ? (
           <span onClick={rightButtonHandler}>

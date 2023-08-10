@@ -1,7 +1,9 @@
-import styles from "./LoginBar.module.css";
 import { useContext } from "react";
 import { Link } from "react-router-dom";
+
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
+import styles from "./LoginBar.module.css";
+
 
 function LoginBar() {
   const { currentUser } = useContext(CurrentUserContext);

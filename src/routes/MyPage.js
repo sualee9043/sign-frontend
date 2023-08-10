@@ -1,9 +1,12 @@
-import styles from "./RoomForm.module.css";
-import axios from "axios";
-import NavBar from "../components/NavBar.js";
-import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
+import NavBar from "../components/NavBar.js";
+
+import styles from "./RoomForm.module.css";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
+
 
 function MyPage() {
   const { currentUser, setCurrentUser } = useContext(CurrentUserContext);

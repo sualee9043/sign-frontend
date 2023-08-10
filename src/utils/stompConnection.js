@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { over } from "stompjs";
 import SockJS from "sockjs-client";
+
 import { EVENT } from "./classroomUtils";
+
 
 export const useStompConnection = (roomId, columnNum, currentUser, setSeats, setChat) => {
   const [stompClient, setStompClient] = useState(null);
@@ -22,7 +24,7 @@ export const useStompConnection = (roomId, columnNum, currentUser, setSeats, set
   };
 
   useEffect(() => {
-    const Sock = new SockJS("http://localhost:8080/ws");
+    const Sock = new SockJS(process.env.REACT_APP_WEB_SOCKET_URL);
     const client = over(Sock);
     // client.debug = () => {};
     setStompClient(client);

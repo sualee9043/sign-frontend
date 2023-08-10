@@ -1,15 +1,16 @@
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import axios from "axios";
-import styles from "./RoomForm.module.css";
+import { ThemeProvider } from "@mui/material/styles";
+import theme from "../utils/theme";
+
 import { SearchRoomCard } from "../components/RoomCard";
 import NavBar from "../components/NavBar.js";
-import { useContext } from "react";
-import { CurrentUserContext } from "../contexts/CurrentUserContext";
-
 import Button from "@mui/material/Button";
-import theme from "../utils/theme";
-import { ThemeProvider } from "@mui/material/styles";
+
+import { CurrentUserContext } from "../contexts/CurrentUserContext";
+import styles from "./RoomForm.module.css";
+
 
 function EnterRoom() {
   const { currentUser } = useContext(CurrentUserContext);

@@ -1,6 +1,8 @@
 // ChatInputBar.js
 import React, { useRef } from "react";
+
 import styles from "./ChatInputBar.module.css";
+
 
 function ChatInputBar({ sendMessage }) {
   const messageRef = useRef();

@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import styles from "./Circle.module.css";
+
 
 function Circle({ size, state = "empty", emoji, mySeat = false, handler = null }) {
   return (

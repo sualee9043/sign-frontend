@@ -1,15 +1,17 @@
-import styles from "./RoomForm.module.css";
-import axios from "axios";
 import { useState, useRef } from "react";
-import button_styles from "../components/Button.module.css";
-import { validationSchema } from "../schemas/CreateRoomSchema";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
+
 import NavBar from "../components/NavBar.js";
+
+import { validationSchema } from "../schemas/CreateRoomSchema";
+import button_styles from "../components/Button.module.css";
+import styles from "./RoomForm.module.css";
+
 
 function CreateRoom() {
   const [name, setName] = useState("");
-  // const [hasChange, setHasChange] = useState(false);
   const hasChange = useRef(false);
   const validationResult = useRef(false);
   const navigate = useNavigate();
@@ -88,13 +90,15 @@ function CreateRoom() {
             onChange={formik.handleChange}
             onBlur={onBlur}
           ></input>
-          <button
-            className={`${button_styles.btn} ${button_styles.room}`}
-            type="submit"
-            disabled={!formik.isValid || formik.isSubmitting}
-          >
-            방 생성
-          </button>
+          <p>
+            <button
+              className={`${button_styles.btn} ${button_styles.room}`}
+              type="submit"
+              disabled={!formik.isValid || formik.isSubmitting}
+            >
+              방 생성
+            </button>
+          </p>
         </form>
       </div>
     </div>

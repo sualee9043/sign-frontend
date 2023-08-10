@@ -1,12 +1,14 @@
-import styles from "./Login.module.css";
-import axios from "axios";
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
-import { validationSchema } from "../schemas/SignupSchema";
+import axios from "axios";
 import Button from "@mui/material/Button";
-import theme from "../utils/theme";
 import { ThemeProvider } from "@mui/material/styles";
+
+import { validationSchema } from "../schemas/SignupSchema";
+import theme from "../utils/theme";
+import styles from "./Login.module.css";
+
 
 function Signup() {
   const navigate = useNavigate();

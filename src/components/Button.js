@@ -1,5 +1,6 @@
 import styles from "./Button.module.css";
 
+
 function Button({ text, type, handleClick }) {
   return (
     <button

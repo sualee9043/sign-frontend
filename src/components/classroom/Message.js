@@ -1,5 +1,6 @@
 import styles from "./Message.module.css";
 
+
 function Message({ myMessage, data }) {
   return myMessage ? (
     <div className={`${styles.msgWrapper} ${styles.right}`}>

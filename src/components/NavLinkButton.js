@@ -1,5 +1,7 @@
-import styles from "./NavLinkButton.module.css";
 import { Link } from "react-router-dom";
+
+import styles from "./NavLinkButton.module.css";
+
 
 function NavLinkButton({ path, text, type }) {
   return (
