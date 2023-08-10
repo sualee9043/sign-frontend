@@ -1,5 +1,6 @@
 import styles from "./Login.module.css";
 import axios from "axios";
+import Logo from "../logo_big.svg";
 import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
@@ -19,6 +20,10 @@ function Login() {
       });
       const headers = response.headers;
       axios.defaults.headers.common["Access-Token"] = headers["access-token"];
+      console.log(
+        'axios.defaults.headers.common["Access-Token"]',
+        axios.defaults.headers.common["Access-Token"]
+      );
       getUser().then(() => {
         navigate("/home");
       });
@@ -30,7 +35,6 @@ function Login() {
   const getUser = async () => {
     try {
       const response = await axios.get("/member");
-      console.log(response);
       const userInfo = response.data;
       setCurrentUser(userInfo);
     } catch (error) {
@@ -43,12 +47,12 @@ function Login() {
   };
 
   return (
-    <div>
-      <div className={styles.wrapper}>
-        <div className={styles.login}>
-          <span className={styles.loginText}>Login</span>
-          {errorMsg === "" ? null : <div className={styles.errorMsg}>{errorMsg}</div>}
-          <div>
+    <div className={styles.wrapper}>
+      <div className={styles.login}>
+        <img className={styles.logo} src={Logo} alt="logo" />
+        {errorMsg === "" ? null : <div className={styles.errorMsg}>{errorMsg}</div>}
+        <div className={styles["login-form"]}>
+          <div className={styles["input-wrapper"]}>
             <input
               className={styles.input}
               type="text"
@@ -57,6 +61,8 @@ function Login() {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
+          </div>
+          <div className={styles["input-wrapper"]}>
             <input
               className={styles.input}
               type="password"
@@ -66,30 +72,35 @@ function Login() {
               onChange={(event) => setPassword(event.target.value)}
               onKeyDown={handleOnKeyPress}
             />
-            <button
-              className={`${styles["login-button"]} ${styles["login-button-blue"]}`}
-              onClick={handleClick}
-            >
-              Sign In
-            </button>
-            <br></br>
-            <Link to="http://localhost:8080/oauth2/authorization/google">
-              <button
-                onClick={null}
-                className={`${styles["login-button"]} ${styles["login-google"]}`}
-              >
-                Google 로그인
-              </button>
-            </Link>
-            <Link to="http://localhost:8080/oauth2/authorization/kakao">
-              <button className={`${styles["login-button"]} ${styles["login-kakao"]}`}>
-                카카오 로그인
-              </button>
-            </Link>
+          </div>
+          <button
+            className={`${styles["login-button"]} ${styles["login-button-blue"]}`}
+            onClick={handleClick}
+          >
+            로그인
+          </button>
+          <br></br>
 
-            <div>
-              <Link to="/signup">Sign up</Link>
-            </div>
+          <button onClick={null} className={`${styles["login-button"]} ${styles["login-google"]}`}>
+            <a
+              href={`${process.env.REACT_APP_OAUTH_LOGIN_URL}/google`}
+              className={styles["login-google"]}
+            >
+              Google 로그인
+            </a>
+          </button>
+
+          <button className={`${styles["login-button"]} ${styles["login-kakao"]}`}>
+            <a
+              href={`${process.env.REACT_APP_OAUTH_LOGIN_URL}/kakao`}
+              className={styles["login-kakao"]}
+            >
+              카카오 로그인
+            </a>
+          </button>
+
+          <div className={styles.signup}>
+            <Link to="/signup">회원가입</Link>
           </div>
         </div>
       </div>

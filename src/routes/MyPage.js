@@ -32,7 +32,7 @@ function MyPage() {
   return (
     <div className={styles.container}>
       <NavBar mode="default" />
-      <div className={styles.wrapper}>
+      <div className={`${styles.wrapper} ${styles.mypage}`}>
         <div onClick={logout}>로그아웃</div>
         <div onClick={unregister}>회원 탈퇴</div>
       </div>

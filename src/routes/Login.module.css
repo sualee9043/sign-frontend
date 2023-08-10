@@ -1,44 +1,52 @@
 .wrapper {
-  height: 90vh;
   display: flex;
   align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 
 .login {
-  width: 100%;
-  /* display: table-cell;
-  vertical-align: middle; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .loginText {
   font-size: 30px;
   font-weight: 250;
+  margin-bottom: 30px;
 }
 
 .input {
-  font-size: 18px;
+  font-size: 21px;
   line-height: 1.5;
   color: rgb(12, 12, 12);
   display: block;
-  width: 70%;
   background: #e6e6e6;
   height: 50px;
   border-radius: 25px;
   padding: 0 30px 0 30px;
-  margin: 20px auto;
+  margin-bottom: 40px;
   border: none;
+  width: calc(100% - 60px);
+}
+
+.input-wrapper {
+  width: 100%;
+  padding-left: 25px;
+  padding-right: 25px;
 }
 
 .login-button {
-  font-size: 18px;
+  font-size: 21px;
   font-weight: 200;
   line-height: 1.5;
   display: block;
-  width: 85%;
+  width: 100%;
   height: 50px;
   border-radius: 25px;
   padding: 0 30px 0 30px;
-  margin: 20px auto;
+  margin-bottom: 20px;
   border: none;
 }
 
@@ -67,7 +75,7 @@
 }
 
 .login-kakao:hover {
-  background: rgb(255, 255, 61);
+  background: rgb(243, 243, 21);
   transition: 0.4s;
   cursor: pointer;
 }
@@ -84,4 +92,24 @@
 .login-google:hover {
   transition: 0.4s;
   background: rgb(255, 111, 85);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-form {
+  width: 80%;
+}
+
+.signup {
+  font-size: 21px;
+}
+
+.logo {
+  width: 100px;
+  margin-bottom: 20px;
 }
