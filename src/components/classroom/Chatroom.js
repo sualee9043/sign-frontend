@@ -1,6 +1,8 @@
-import styles from "./Chatroom.module.css";
 import ChatMessages from "./ChatMessages";
 import ChatInputBar from "./ChatInputBar";
+
+import styles from "./Chatroom.module.css";
+
 
 function Chatroom({ visible, chat, stateRef, sendMessage }) {
   return (

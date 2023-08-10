@@ -1,21 +1,24 @@
-import { createBrowserHistory } from "history";
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import axios from "axios";
-import styles from "./Classroom.module.css";
-import NavBar from "../components/NavBar.js";
-import { Seat, EmptySeat } from "../components/Seat";
-import ColorCircle from "../components/classroom/ColorCircle";
-import Emoji from "../components/Emoji";
-import Chatroom from "../components/classroom/Chatroom";
-
+import { createBrowserHistory } from "history";
+import { useParams } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination } from "swiper";
 import "swiper/css";
+import "swiper/css/pagination";
+
+import NavBar from "../components/NavBar.js";
+import { Seat, EmptySeat } from "../components/Seat";
+import Emoji from "../components/Emoji";
+import Chatroom from "../components/classroom/Chatroom";
+import ColorCircle from "../components/classroom/ColorCircle";
 
 import { colors, emojis } from "../utils/classroomUtils";
-import { useParams } from "react-router-dom";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import { useStompConnection } from "../utils/stompConnection";
+import styles from "./Classroom.module.css";
+
 
 const InitDataFetcher = ({ children }) => {
   const params = useParams();
@@ -51,11 +54,12 @@ function Room({ currentUser, roomInfo }) {
   const params = useParams();
   const roomId = parseInt(params.roomId);
   const history = createBrowserHistory();
-  const [visible, setVisible] = useState(false);
   const column = roomInfo["capacity"] > 50 ? 10 : 5;
+  const [visible, setVisible] = useState(false);
   const [seats, setSeats] = useState(new Array(roomInfo["capacity"]).fill(["empty", ""]));
   const [chat, setChat] = useState([]);
-
+  const previousEmoji = useRef("");
+  
   const { seatNumRef, selectColor, changeSeat, sendMessage, selectEmoji, disconnect } =
     useStompConnection(roomId, column, currentUser, setSeats, setChat);
   const openChatroom = () => {
@@ -99,31 +103,36 @@ function Room({ currentUser, roomInfo }) {
             )}
           </div>
           <div className={styles["expression-wrapper"]}>
-            <Swiper>
+            <Swiper pagination={true} modules={[Pagination]}>
               <SwiperSlide>
-                <div className={styles.colors}>
+                <div className={`${styles.colors} ${styles.expressions}`}>
                   {colors.map((color, index) => (
                     <ColorCircle key={index} color={color} selectColor={selectColor} />
                   ))}
                 </div>
               </SwiperSlide>
               <SwiperSlide>
-                <div>
+                <div className={styles.expressions}>
                   {emojis.map((emoji, index) => (
-                    <Emoji key={index} emoji={emoji} selectEmoji={selectEmoji}></Emoji>
+                    <Emoji
+                      key={index}
+                      emoji={emoji}
+                      previousEmoji={previousEmoji}
+                      selectEmoji={selectEmoji}
+                    ></Emoji>
                   ))}
                 </div>
               </SwiperSlide>
             </Swiper>
           </div>
         </div>
+        <Chatroom
+          visible={visible}
+          chat={chat}
+          stateRef={seatNumRef}
+          sendMessage={sendMessage}
+        ></Chatroom>
       </div>
-      <Chatroom
-        visible={visible}
-        chat={chat}
-        stateRef={seatNumRef}
-        sendMessage={sendMessage}
-      ></Chatroom>
     </div>
   );
 }
