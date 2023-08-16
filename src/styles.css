@@ -27,6 +27,7 @@ body {
   background: rgb(48, 48, 48);
   color: white;
   margin: auto;
+  height: 100vh;
 }
 
 div {
@@ -35,12 +36,10 @@ div {
 
 #root {
   margin: auto;
+  padding: 35px 20px;
+  height: -webkit-fill-available;
 }
 
 .rooms {
   text-align: left;
-}
-
-#root {
-  padding: 35px 20px;
 }
