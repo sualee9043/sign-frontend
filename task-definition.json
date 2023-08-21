@@ -1,0 +1,176 @@
+{
+  "family": "sign-app",
+  "containerDefinitions": [
+    {
+      "name": "backend",
+      "image": "207995484402.dkr.ecr.ap-northeast-2.amazonaws.com/sign-backend:latest",
+      "essential": true,
+      "hostname": "backend",
+      "environment": [
+        {
+          "name": "DB_URL",
+          "value": "jdbc:mariadb://db:3306/sign?createDatabaseIfNotExist=true"
+        },
+        { "name": "SPRING_ACTIVE_PROFILE", "value": "production" }
+      ],
+      "secrets": [
+        {
+          "name": "DB_USERNAME",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:207995484402:secret:sign-prod-rO1shG:DB_USERNAME::"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:207995484402:secret:sign-prod-rO1shG:DB_PASSWORD::"
+        },
+        {
+          "name": "JWT_SECRET_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:207995484402:secret:sign-prod-rO1shG:JWT_SECRET_KEY::"
+        },
+        {
+          "name": "GOOGLE_OAUTH_CLIENT_ID",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:207995484402:secret:sign-prod-rO1shG:GOOGLE_OAUTH_CLIENT_ID::"
+        },
+        {
+          "name": "GOOGLE_OAUTH_CLIENT_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:207995484402:secret:sign-prod-rO1shG:GOOGLE_OAUTH_CLIENT_SECRET::"
+        },
+        {
+          "name": "KAKAO_OAUTH_CLIENT_ID",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:207995484402:secret:sign-prod-rO1shG:KAKAO_OAUTH_CLIENT_ID::"
+        },
+        {
+          "name": "KAKAO_OAUTH_CLIENT_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:207995484402:secret:sign-prod-rO1shG:KAKAO_OAUTH_CLIENT_SECRET::"
+        }
+      ],
+      "portMappings": [
+        {
+          "containerPort": 8080
+        }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:8080 || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/sign-backend",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-create-group": "true"
+        }
+      },
+      "dependsOn": [
+        {
+          "containerName": "db",
+          "condition": "HEALTHY"
+        }
+      ],
+      "links": ["db:db"]
+    },
+    {
+      "name": "frontend",
+      "image": "207995484402.dkr.ecr.ap-northeast-2.amazonaws.com/sign-frontend:latest",
+      "essential": true,
+      "hostname": "frontend",
+      "environment": [{ "name": "NODE_ENV", "value": "production" }],
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 0
+        }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3,
+        "startPeriod": 60
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/sign-frontend",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-create-group": "true"
+        }
+      }
+    },
+    {
+      "name": "proxy",
+      "image": "207995484402.dkr.ecr.ap-northeast-2.amazonaws.com/sign-proxy:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "hostPort": 80
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/nginx",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-create-group": "true"
+        }
+      },
+      "dependsOn": [
+        {
+          "containerName": "backend",
+          "condition": "HEALTHY"
+        },
+        {
+          "containerName": "frontend",
+          "condition": "HEALTHY"
+        }
+      ],
+      "links": ["frontend:frontend", "backend:backend"]
+    },
+    {
+      "name": "db",
+      "image": "mariadb:10.6",
+      "essential": true,
+      "hostname": "db",
+      "command": ["--lower_case_table_names=1"],
+      "environment": [{ "name": "MYSQL_DATABASE", "value": "sign" }],
+      "secrets": [
+        {
+          "name": "MYSQL_ROOT_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:207995484402:secret:sign-prod-rO1shG:DB_PASSWORD::"
+        }
+      ],
+      "portMappings": [
+        {
+          "containerPort": 3306,
+          "hostPort": 3306
+        }
+      ],
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "mysql -h localhost -u root -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1'"
+        ],
+        "interval": 20,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/db",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-create-group": "true"
+        }
+      }
+    }
+  ],
+  "networkMode": "bridge",
+  "requiresCompatibilities": ["EC2"],
+  "executionRoleArn": "arn:aws:iam::207995484402:role/ecsTaskExecutionRole",
+  "cpu": "256",
+  "memory": "400",
+  "taskRoleArn": "arn:aws:iam::207995484402:role/ecsTaskExecutionRole"
+}
