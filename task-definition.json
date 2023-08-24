@@ -78,8 +78,7 @@
       "environment": [{ "name": "NODE_ENV", "value": "production" }],
       "portMappings": [
         {
-          "containerPort": 3000,
-          "hostPort": 0
+          "containerPort": 3000
         }
       ],
       "healthCheck": {
@@ -104,8 +103,7 @@
       "essential": true,
       "portMappings": [
         {
-          "containerPort": 80,
-          "hostPort": 80
+          "containerPort": 80
         }
       ],
       "logConfiguration": {
@@ -115,6 +113,12 @@
           "awslogs-region": "ap-northeast-2",
           "awslogs-create-group": "true"
         }
+      },
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost/sign/proxy/status || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3
       },
       "dependsOn": [
         {
@@ -143,8 +147,7 @@
       ],
       "portMappings": [
         {
-          "containerPort": 3306,
-          "hostPort": 3306
+          "containerPort": 3306
         }
       ],
       "healthCheck": {
