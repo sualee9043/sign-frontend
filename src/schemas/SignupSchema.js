@@ -4,7 +4,7 @@ import axios from "axios";
 const usernameSchema = Yup.string()
   .required("이름을 입력하세요.")
   .min(2, "이름은 최소 2글자 이상입니다.")
-  .max(10, "이름은 최대 10글자입니다.")
+  .max(30, "이름은 최대 30글자입니다.")
   .matches(
     /^[가-힣a-zA-Z][^!@#$%^&*()_+=[\]{};':"\\|,.<>?\s]*$/,
     "이름에는 특수문자를 포함할 수 없고 숫자로 시작할 수 없습니다."
