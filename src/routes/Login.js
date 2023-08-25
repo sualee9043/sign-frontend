@@ -22,10 +22,6 @@ function Login() {
       });
       const headers = response.headers;
       axios.defaults.headers.common["Access-Token"] = headers["access-token"];
-      console.log(
-        'axios.defaults.headers.common["Access-Token"]',
-        axios.defaults.headers.common["Access-Token"]
-      );
       getUser().then(() => {
         navigate("/home");
       });
@@ -82,7 +78,6 @@ function Login() {
             로그인
           </button>
           <br></br>
-
           <button onClick={null} className={`${styles["login-button"]} ${styles["login-google"]}`}>
             <a
               href={`${process.env.REACT_APP_OAUTH_LOGIN_URL}/google`}

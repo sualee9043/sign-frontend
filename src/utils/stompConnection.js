@@ -130,8 +130,6 @@ export const useStompConnection = (roomId, columnNum, currentUser, setSeats, set
         { roomId: roomId, "Access-Token": axios.defaults.headers.common["Access-Token"] },
         onConnected,
         (error) => {
-          // 방에서 내보내야 함
-          console.log("There is");
           console.error(error);
           navigate("/home");
         }

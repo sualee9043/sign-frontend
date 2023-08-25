@@ -42,7 +42,7 @@ function EnterRoom() {
       if (error.response && error.response.status === 409) {
         setErrorMessage(error.response.data["message"]);
       } else {
-        console.log(error.response);
+        console.error(error.response);
       }
     }
   };

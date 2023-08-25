@@ -8,7 +8,7 @@ const injectContext = (PassedComponent) => {
   const StoreWrapper = (props) => {
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    useEffect(() => {
+    useEffect(() => { 
       const getUser = async () => {
         try {
           const response = await axios.get("/member");
@@ -18,6 +18,7 @@ const injectContext = (PassedComponent) => {
           setLoading(false);
         } catch (error) {
           console.error("There has been an error login", error);
+          setLoading(false);
         }
       };
 
