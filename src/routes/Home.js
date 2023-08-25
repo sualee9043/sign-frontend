@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 
@@ -13,21 +13,28 @@ import styles from "./Home.module.css";
 
 
 function Home() {
+  const navigate = useNavigate();
   const { currentUser } = useContext(CurrentUserContext);
+  const [rooms, setRooms] = useState(null);
   const params = useParams();
+  
   if (params) {
     axios.defaults.headers.common["Access-Token"] = params.token;
   }
 
-  const [rooms, setRooms] = useState(null);
   useEffect(() => {
+    console.log('currentUser', currentUser);
+    if (currentUser === null) {
+      navigate("/");
+    }
+    
     async function getRooms() {
       try {
         const response = await axios.get(`/member/${currentUser.id}/classrooms`);
         const roomsJson = response.data;
         setRooms(roomsJson);
       } catch (error) {
-        console.log("There has been an error login", error);
+        console.error("There has been an error login", error);
       }
     }
     getRooms();
