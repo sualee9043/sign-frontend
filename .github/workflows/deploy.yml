@@ -1,13 +1,4 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# GitHub recommends pinning actions to a commit SHA.
-# To get a newer version, you will need to update the SHA.
-# You can also reference a tag or branch, but the action may change without warning.
-
-name: Deploy to Amazon ECS
+name: Build and Push Image to Amazon ECR
 
 on:
   push:
@@ -15,15 +6,12 @@ on:
       - main
 
 env:
-  AWS_REGION: ap-northeast-2                   # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: sign-frontend                 # set this to your Amazon ECR repository name
-  ECS_SERVICE: sign-github-action-2            # set this to your Amazon ECS service name
-  ECS_CLUSTER: SignCluster2023                 # set this to your Amazon ECS cluster name
-  ECS_TASK_DEFINITION: task-definition.json    # set this to the name or ARN of your existing task definition
+  AWS_REGION: ap-northeast-2
+  ECR_REPOSITORY: sign-frontend
 
 jobs:
-  deploy:
-    name: Deploy
+  build:
+    name: Build
     runs-on: ubuntu-latest
     environment: production
 
@@ -48,16 +36,5 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: latest
         run: |
-          # Build a docker container and
-          # push it to ECR so that it can
-          # be deployed to ECS.
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-      - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
-        with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
