@@ -19,7 +19,7 @@ function LoginBar() {
               style={
                 currentUser.picture
                   ? { backgroundImage: `url("${currentUser.picture}")` }
-                  : { backgroundImage: `url("logo512.png")` }
+                  : { backgroundImage: `url("default_profile.png")` }
               }
             ></div>
           </Link>
