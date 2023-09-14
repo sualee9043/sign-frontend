@@ -1,4 +1,3 @@
-// ChatInputBar.js
 import React, { useRef } from "react";
 
 import styles from "./ChatInputBar.module.css";
@@ -16,14 +15,16 @@ function ChatInputBar({ sendMessage }) {
   };
 
   return (
+    <form onSubmit={handleSubmit}>
     <div className={styles.inputBar}>
-      <form onSubmit={handleSubmit}>
+      
         <input className={styles.input} ref={messageRef} />
         <button className={styles.button} type="submit">
           전송
         </button>
-      </form>
+      
     </div>
+    </form>
   );
 }
 
