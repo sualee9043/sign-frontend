@@ -3,18 +3,45 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { over } from "stompjs";
 import SockJS from "sockjs-client";
+import { useIdleTimer } from 'react-idle-timer'
 
 import { EVENT } from "./classroomUtils";
 
 
-export const useStompConnection = (roomId, columnNum, currentUser, setSeats, setChat) => {
+export const useStompConnection = (room, currentUser, setState) => {
+  const [stomp, setStomp] = useState(null);
   const [stompClient, setStompClient] = useState(null);
+  
   const [roomSubscription, setRoomSubscription] = useState(null);
   const [chatSubscription, setChatSubsription] = useState(null);
+  // const [queueSubscription, setQueueSubscription] = useState(null);
+  const [isConnected, setIsConnected] = useState(null);
 
   const navigate = useNavigate();
   const seatNumRef = useRef();
-  const rowRef = useRef();
+  // const rowRef = useRef();
+  const [row, setRow] = useState(null);  
+  const {roomId, columnNum} = room;
+  const {setSeats, setChat} = setState;
+
+  const tokenHeader = { 
+    "roomId": roomId, 
+    "Access-Token": axios.defaults.headers.common["Access-Token"],
+  };
+
+  useEffect(()=> {
+    window.addEventListener("unload", disconnect);
+    return () => {
+      window.removeEventListener("unload", disconnect);
+    }
+  }, []);
+
+  useEffect(() => {
+    const Sock = new SockJS(process.env.REACT_APP_WEB_SOCKET_URL);
+    const client = over(Sock);
+    // client.debug = () => {};
+    setStompClient(client);
+  }, [currentUser]);
 
   const onChatMessageReceived = (received) => {
     const parsedMsg = JSON.parse(received.body);
@@ -22,36 +49,47 @@ export const useStompConnection = (roomId, columnNum, currentUser, setSeats, set
       return [...chat, parsedMsg];
     });
   };
+  
+  const color = (seatNum, receivedColor) => {
+    setSeats((oldSeats) => {
+      let newSeats = [...oldSeats];
+      newSeats[seatNum - 1] = [receivedColor, oldSeats[seatNum - 1][1]];
+      return newSeats;
+    });
+  };
 
-  useEffect(() => {
-    const Sock = new SockJS(process.env.REACT_APP_WEB_SOCKET_URL);
-    const client = over(Sock);
-    // client.debug = () => {};
-    setStompClient(client);
-  }, [roomId, currentUser]);
+  const drawEmoji = (seatNum, receivedEmoji) => {
+    setSeats((oldSeats) => {
+      let newSeats = [...oldSeats];
+      newSeats[seatNum - 1][1] = receivedEmoji;
+      return newSeats;
+    });
+  };
 
   useEffect(() => {
     if (stompClient) {
       const onConnected = () => {
+        setIsConnected(true);
         setRoomSubscription(stompClient.subscribe(`/topic/classroom/${roomId}`, onMessageReceived));
-        const queueSub = stompClient.subscribe(
-          `/queue/temp/classroom/${roomId}/user/${currentUser.email}`,
+        const queueSubscription = stompClient.subscribe(
+          `/queue/temp/classroom/${roomId}/member/${currentUser.id}`,
           (received) => {
             const classroomInfo = JSON.parse(received.body);
             seatNumRef.current = classroomInfo.seatNum;
-            rowRef.current = parseInt(classroomInfo.seatNum / columnNum) + 1;
+            const newRow = parseInt(classroomInfo.seatNum / columnNum) + 1; 
+            setRow(newRow);
             setChatSubsription((_) => {
               const subscription = stompClient.subscribe(
-                `/topic/classroom/${roomId}/chat/${rowRef.current}`,
+                `/topic/classroom/${roomId}/chat/${newRow}`,
                 onChatMessageReceived
               );
               stompClient.send(
-                `/app/classroom/${roomId}/chat/${rowRef.current}`,
+                `/topic/classroom/${roomId}/chat/${newRow}`,
                 {},
                 JSON.stringify({
                   type: EVENT.ENTER,
                   seatNum: seatNumRef.current,
-                  row: rowRef.current,
+                  row: newRow,
                   content: null,
                 })
               );
@@ -64,84 +102,91 @@ export const useStompConnection = (roomId, columnNum, currentUser, setSeats, set
               }
               return newSeats;
             });
+            stompClient.send(
+              `/topic/classroom/${roomId}`,
+              {},
+              JSON.stringify({
+                type: EVENT.ENTER,
+                seatNum: seatNumRef.current,
+                content: null,
+              })
+            );
 
-            queueSub.unsubscribe();
+            queueSubscription.unsubscribe();
           }
         );
-
-        stompClient.send(
-          `/app/classroomInfo/${roomId}`,
-          {},
-          JSON.stringify({
-            sender: currentUser.email,
-          })
-        );
+        
       };
-
-      const onMessageReceived = (received) => {
-        const parsedMsg = JSON.parse(received.body);
-        switch (parsedMsg.type) {
-          case EVENT.ENTER:
-            color(parsedMsg.seatNum, "unselected");
-            break;
-          case EVENT.COLOR:
-            color(parsedMsg.seatNum, parsedMsg.message);
-            break;
-          case EVENT.DRAW_EMOJI:
-            drawEmoji(parsedMsg.seatNum, parsedMsg.message);
-            break;
-          case EVENT.EXIT:
-            color(parsedMsg.seatNum, "empty");
-            break;
-          case EVENT.CHANGE_SEAT:
-            setSeats((oldSeats) => {
-              let newSeats = [...oldSeats];
-              newSeats[parseInt(parsedMsg.message) - 1] = oldSeats[parsedMsg.seatNum - 1];
-              newSeats[parsedMsg.seatNum - 1] = ["empty", ""];
-              return newSeats;
-            });
-            if (parsedMsg.seatNum === seatNumRef.current) {
-              seatNumRef.current = parseInt(parsedMsg.message);
-              rowRef.current = parseInt(seatNumRef.current / columnNum) + 1;
-            }
-            break;
-          default:
-            console.error("Unexpected message.");
-        }
-      };
-
-      const color = (seatNum, receivedColor) => {
-        setSeats((oldSeats) => {
-          let newSeats = [...oldSeats];
-          newSeats[seatNum - 1][0] = receivedColor;
-          return newSeats;
-        });
-      };
-
-      const drawEmoji = (seatNum, receivedEmoji) => {
-        setSeats((oldSeats) => {
-          let newSeats = [...oldSeats];
-          newSeats[seatNum - 1][1] = receivedEmoji;
-          return newSeats;
-        });
-      };
-
+      
       stompClient.connect(
-        { roomId: roomId, "Access-Token": axios.defaults.headers.common["Access-Token"] },
+        tokenHeader,
         onConnected,
         (error) => {
           console.error(error);
           navigate("/home");
         }
-      );
+      );  
     }
   }, [stompClient]);
 
+
+  const onMessageReceived = (received) => {
+    const parsedMsg = JSON.parse(received.body);
+    switch (parsedMsg.type) {
+      case EVENT.ENTER:
+        color(parsedMsg.seatNum, "unselected");
+        break;
+      case EVENT.COLOR:
+        color(parsedMsg.seatNum, parsedMsg.message);
+        break;
+      case EVENT.DRAW_EMOJI:
+        drawEmoji(parsedMsg.seatNum, parsedMsg.message);
+        break;
+      case EVENT.EXIT:
+        color(parsedMsg.seatNum, "empty");
+        break;
+      case EVENT.CHANGE_SEAT:
+        setSeats((oldSeats) => {
+          let newSeats = [...oldSeats];
+          newSeats[parseInt(parsedMsg.message) - 1] = oldSeats[parsedMsg.seatNum - 1];
+          newSeats[parsedMsg.seatNum - 1] = ["empty", ""];
+          return newSeats;
+        });
+        if (parsedMsg.seatNum === seatNumRef.current) {
+          seatNumRef.current = parseInt(parsedMsg.message);
+          setRow(parseInt(seatNumRef.current / columnNum) + 1);
+        }
+        break;
+      case EVENT.CHECK:
+        console.log("check");
+        break;
+      default:
+        console.error("Unexpected message.");
+    }
+  };
+
+  const check = useCallback(
+    () => {
+    // stompClient.send(
+    //   `/topic/classroom/${roomId}`,
+    //   tokenHeader,
+    //   JSON.stringify({
+    //     type: EVENT.CHECK,
+    //     roomId: roomId
+    //   })
+    // );
+  }, [stompClient]);
+  
+  const { isIdle } = useIdleTimer({
+    onIdle: check,
+    timeout: 3_000
+  });
+  
   const selectColor = useCallback(
     (color) => {
       stompClient.send(
-        `/app/classroom/${roomId}`,
-        {},
+        `/topic/classroom/${roomId}`,
+        tokenHeader,
         JSON.stringify({
           type: EVENT.COLOR,
           roomId: roomId,
@@ -156,8 +201,8 @@ export const useStompConnection = (roomId, columnNum, currentUser, setSeats, set
   const selectEmoji = useCallback(
     (emoji) => {
       stompClient.send(
-        `/app/classroom/${roomId}`,
-        {},
+        `/topic/classroom/${roomId}`,
+        tokenHeader,
         JSON.stringify({
           type: EVENT.DRAW_EMOJI,
           roomId: roomId,
@@ -174,8 +219,8 @@ export const useStompConnection = (roomId, columnNum, currentUser, setSeats, set
       const prevSeatNum = seatNumRef.current;
       const newRow = parseInt(seatNum / columnNum) + 1;
       stompClient.send(
-        `/app/classroom/${roomId}`,
-        {},
+        `/topic/classroom/${roomId}`,
+        tokenHeader,
         JSON.stringify({
           type: EVENT.CHANGE_SEAT,
           roomId: roomId,
@@ -183,9 +228,9 @@ export const useStompConnection = (roomId, columnNum, currentUser, setSeats, set
           seatNum: seatNumRef.current,
         })
       );
-      if (newRow !== rowRef.current) {
+      if (newRow !== row) {
         stompClient.send(
-          `/app/classroom/${roomId}/chat/${rowRef.current}`,
+          `/topic/classroom/${roomId}/chat/${row}`,
           {},
           JSON.stringify({
             type: EVENT.EXIT,
@@ -195,19 +240,20 @@ export const useStompConnection = (roomId, columnNum, currentUser, setSeats, set
         );
         setChat([]);
         chatSubscription.unsubscribe();
-        rowRef.current = newRow;
+        setRow(newRow);
         setChatSubsription((_) => {
           const subscription = stompClient.subscribe(
-            `/topic/classroom/${roomId}/chat/${rowRef.current}`,
-            onChatMessageReceived
+            `/topic/classroom/${roomId}/chat/${row}`,
+            onChatMessageReceived,
+            tokenHeader
           );
           stompClient.send(
-            `/app/classroom/${roomId}/chat/${rowRef.current}`,
-            {},
+            `/topic/classroom/${roomId}/chat/${row}`,
+            tokenHeader,
             JSON.stringify({
               type: EVENT.ENTER,
               seatNum: seatNum,
-              row: rowRef.current,
+              row: newRow,
               content: null,
             })
           );
@@ -230,8 +276,8 @@ export const useStompConnection = (roomId, columnNum, currentUser, setSeats, set
   const sendMessage = useCallback(
     (message) => {
       stompClient.send(
-        `/app/classroom/${roomId}/chat/${rowRef.current}`,
-        {},
+        `/topic/classroom/${roomId}/chat/${row}`,
+        tokenHeader,
         JSON.stringify({
           type: EVENT.TALK,
           seatNum: seatNumRef.current,
@@ -239,14 +285,32 @@ export const useStompConnection = (roomId, columnNum, currentUser, setSeats, set
         })
       );
     },
-    [stompClient, seatNumRef]
+    [stompClient, seatNumRef, row]
   );
 
   const disconnect = useCallback(() => {
     if (stompClient !== null) {
+      stompClient.send(
+        `/topic/classroom/${roomId}`,
+        tokenHeader,
+        JSON.stringify({
+          type: EVENT.EXIT,
+          seatNum: seatNumRef.current,
+          content: null,
+        })
+      );
       stompClient.disconnect();
     }
-  }, [stompClient]);
+  }, [stompClient, seatNumRef]);
+ 
+  const actions = {
+    selectColor,
+    changeSeat,
+    sendMessage,
+    selectEmoji,
+    disconnect,
+  }
 
-  return { seatNumRef, selectColor, changeSeat, sendMessage, selectEmoji, disconnect };
+  
+  return { seatNumRef, isConnected, actions };
 };
