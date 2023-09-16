@@ -14,13 +14,13 @@ export const useStompConnection = (room, currentUser, setState) => {
   
   const [roomSubscription, setRoomSubscription] = useState(null);
   const [chatSubscription, setChatSubsription] = useState(null);
-  // const [queueSubscription, setQueueSubscription] = useState(null);
+  const [queueSubscription, setQueueSubscription] = useState(null);
   const [isConnected, setIsConnected] = useState(null);
 
   const navigate = useNavigate();
   const seatNumRef = useRef();
-  // const rowRef = useRef();
-  const [row, setRow] = useState(null);  
+  const rowRef = useRef();
+  // const [row, setRow] = useState(null);  
   const {roomId, columnNum} = room;
   const {setSeats, setChat} = setState;
 
@@ -70,31 +70,17 @@ export const useStompConnection = (room, currentUser, setState) => {
     if (stompClient) {
       const onConnected = () => {
         setIsConnected(true);
-        setRoomSubscription(stompClient.subscribe(`/topic/classroom/${roomId}`, onMessageReceived));
-        const queueSubscription = stompClient.subscribe(
+        const roomSub = stompClient.subscribe(`/topic/classroom/${roomId}`, onMessageReceived, tokenHeader);
+        setRoomSubscription(roomSub);
+        // const queueSubscription = stompClient.subscribe(
+        const queueSub = stompClient.subscribe(
           `/queue/temp/classroom/${roomId}/member/${currentUser.id}`,
           (received) => {
             const classroomInfo = JSON.parse(received.body);
             seatNumRef.current = classroomInfo.seatNum;
-            const newRow = parseInt(classroomInfo.seatNum / columnNum) + 1; 
-            setRow(newRow);
-            setChatSubsription((_) => {
-              const subscription = stompClient.subscribe(
-                `/topic/classroom/${roomId}/chat/${newRow}`,
-                onChatMessageReceived
-              );
-              stompClient.send(
-                `/topic/classroom/${roomId}/chat/${newRow}`,
-                {},
-                JSON.stringify({
-                  type: EVENT.ENTER,
-                  seatNum: seatNumRef.current,
-                  row: newRow,
-                  content: null,
-                })
-              );
-              return subscription;
-            });
+            // const newRow = parseInt(classroomInfo.seatNum / columnNum) + 1; 
+            // setRow(newRow);  
+            rowRef.current = parseInt(classroomInfo.seatNum / columnNum) + 1;
             setSeats((oldSeats) => {
               let newSeats = [...oldSeats];
               for (let seatNum in classroomInfo.classRoomStates) {
@@ -102,19 +88,10 @@ export const useStompConnection = (room, currentUser, setState) => {
               }
               return newSeats;
             });
-            stompClient.send(
-              `/topic/classroom/${roomId}`,
-              {},
-              JSON.stringify({
-                type: EVENT.ENTER,
-                seatNum: seatNumRef.current,
-                content: null,
-              })
-            );
-
-            queueSubscription.unsubscribe();
-          }
+          },
+          tokenHeader
         );
+        setQueueSubscription(queueSub);
         
       };
       
@@ -128,6 +105,39 @@ export const useStompConnection = (room, currentUser, setState) => {
       );  
     }
   }, [stompClient]);
+
+  useEffect(() => {
+    if (queueSubscription) {
+      setChatSubsription((_) => {
+        const subscription = stompClient.subscribe(
+          `/topic/classroom/${roomId}/chat/${rowRef.current}`,
+          onChatMessageReceived,
+          tokenHeader
+        );
+        stompClient.send(
+          `/topic/classroom/${roomId}/chat/${rowRef.current}`,
+          tokenHeader,
+          JSON.stringify({
+            type: EVENT.ENTER,
+            seatNum: seatNumRef.current,
+            row: rowRef.current,
+            content: null,
+          })
+        );
+        return subscription;
+      });
+
+      stompClient.send(
+        `/topic/classroom/${roomId}`,
+        tokenHeader,
+        JSON.stringify({
+          type: EVENT.ENTER,
+          seatNum: seatNumRef.current,
+          content: null,
+        })
+      );
+    }
+  }, [queueSubscription]);
 
 
   const onMessageReceived = (received) => {
@@ -145,18 +155,65 @@ export const useStompConnection = (room, currentUser, setState) => {
       case EVENT.EXIT:
         color(parsedMsg.seatNum, "empty");
         break;
-      case EVENT.CHANGE_SEAT:
-        setSeats((oldSeats) => {
-          let newSeats = [...oldSeats];
-          newSeats[parseInt(parsedMsg.message) - 1] = oldSeats[parsedMsg.seatNum - 1];
-          newSeats[parsedMsg.seatNum - 1] = ["empty", ""];
-          return newSeats;
-        });
-        if (parsedMsg.seatNum === seatNumRef.current) {
-          seatNumRef.current = parseInt(parsedMsg.message);
-          setRow(parseInt(seatNumRef.current / columnNum) + 1);
-        }
-        break;
+        case EVENT.CHANGE_SEAT:
+          setSeats((oldSeats) => {
+            let newSeats = [...oldSeats];
+            newSeats[parseInt(parsedMsg.message) - 1] = oldSeats[parsedMsg.seatNum - 1];
+            newSeats[parsedMsg.seatNum - 1] = ["empty", ""];
+            return newSeats;
+          });
+          if (parsedMsg.seatNum === seatNumRef.current) {
+            const prevSeatNum = seatNumRef.current;
+            const newSeatNum = parseInt(parsedMsg.message);
+            const prevRow = rowRef.current;
+            const newRow = parseInt(newSeatNum / columnNum) + 1;
+
+            if (newRow !== prevRow) { // 다른 줄
+              stompClient.send(
+                `/topic/classroom/${roomId}/chat/${rowRef.current}`,
+                tokenHeader,
+                JSON.stringify({
+                  type: EVENT.EXIT,
+                  seatNum: prevSeatNum,
+                  content: null,
+                })
+              );
+              setChat([]);
+              chatSubscription.unsubscribe();
+              
+              setChatSubsription((_) => {
+                const subscription = stompClient.subscribe(
+                  `/topic/classroom/${roomId}/chat/${newRow}`,
+                  onChatMessageReceived,
+                  tokenHeader
+                );
+                stompClient.send(
+                  `/topic/classroom/${roomId}/chat/${newRow}`,
+                  tokenHeader,
+                  JSON.stringify({
+                    type: EVENT.ENTER,
+                    seatNum: newSeatNum,
+                    row: newRow,
+                    content: null,
+                  })
+                );
+                
+                return subscription;
+              });
+            } else { // 같은 줄
+              setChat((chat) => {
+                chat.forEach((message) => {
+                  if (message.seatNum === prevSeatNum) {
+                    message.seatNum = newSeatNum;
+                  }
+                });
+                return chat;
+              });
+            }
+            rowRef.current = newRow;
+            seatNumRef.current = newSeatNum;
+          }
+          break;
       case EVENT.CHECK:
         console.log("check");
         break;
@@ -216,8 +273,7 @@ export const useStompConnection = (room, currentUser, setState) => {
 
   const changeSeat = useCallback(
     (seatNum) => {
-      const prevSeatNum = seatNumRef.current;
-      const newRow = parseInt(seatNum / columnNum) + 1;
+      
       stompClient.send(
         `/topic/classroom/${roomId}`,
         tokenHeader,
@@ -228,47 +284,7 @@ export const useStompConnection = (room, currentUser, setState) => {
           seatNum: seatNumRef.current,
         })
       );
-      if (newRow !== row) {
-        stompClient.send(
-          `/topic/classroom/${roomId}/chat/${row}`,
-          {},
-          JSON.stringify({
-            type: EVENT.EXIT,
-            seatNum: seatNumRef.current,
-            content: null,
-          })
-        );
-        setChat([]);
-        chatSubscription.unsubscribe();
-        setRow(newRow);
-        setChatSubsription((_) => {
-          const subscription = stompClient.subscribe(
-            `/topic/classroom/${roomId}/chat/${row}`,
-            onChatMessageReceived,
-            tokenHeader
-          );
-          stompClient.send(
-            `/topic/classroom/${roomId}/chat/${row}`,
-            tokenHeader,
-            JSON.stringify({
-              type: EVENT.ENTER,
-              seatNum: seatNum,
-              row: newRow,
-              content: null,
-            })
-          );
-          return subscription;
-        });
-      } else {
-        setChat((chat) => {
-          chat.forEach((message) => {
-            if (message.seatNum === prevSeatNum) {
-              message.seatNum = seatNum;
-            }
-          });
-          return chat;
-        });
-      }
+      
     },
     [stompClient, seatNumRef, chatSubscription]
   );
@@ -276,7 +292,7 @@ export const useStompConnection = (room, currentUser, setState) => {
   const sendMessage = useCallback(
     (message) => {
       stompClient.send(
-        `/topic/classroom/${roomId}/chat/${row}`,
+        `/topic/classroom/${roomId}/chat/${rowRef.current}`,
         tokenHeader,
         JSON.stringify({
           type: EVENT.TALK,
@@ -285,7 +301,7 @@ export const useStompConnection = (room, currentUser, setState) => {
         })
       );
     },
-    [stompClient, seatNumRef, row]
+    [stompClient, seatNumRef, rowRef.current]
   );
 
   const disconnect = useCallback(() => {
