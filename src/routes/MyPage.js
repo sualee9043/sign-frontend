@@ -17,14 +17,14 @@ function MyPage() {
       setCurrentUser(null);
       navigate("/");
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
   const unregister = async () => {
     try {
       await axios.post("/member/logout");
-      await axios.delete(`/member/${currentUser.id}`);
+      await axios.delete(`/member`);
       setCurrentUser(null);
       navigate("/");
     } catch (error) {
