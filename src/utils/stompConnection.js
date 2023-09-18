@@ -3,53 +3,34 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { over } from "stompjs";
 import SockJS from "sockjs-client";
-import { useIdleTimer } from 'react-idle-timer'
 
 import { EVENT } from "./classroomUtils";
 
 
 export const useStompConnection = (room, currentUser, setState) => {
-  const [stomp, setStomp] = useState(null);
   const [stompClient, setStompClient] = useState(null);
-  
   const [roomSubscription, setRoomSubscription] = useState(null);
-  const [chatSubscription, setChatSubsription] = useState(null);
+  const [chatSubscription, setChatSubscription] = useState(null);
   const [queueSubscription, setQueueSubscription] = useState(null);
   const [isConnected, setIsConnected] = useState(null);
 
   const navigate = useNavigate();
   const seatNumRef = useRef();
   const rowRef = useRef();
-  // const [row, setRow] = useState(null);  
+
   const {roomId, columnNum} = room;
   const {setSeats, setChat} = setState;
 
-  const tokenHeader = { 
-    "roomId": roomId, 
-    "Access-Token": axios.defaults.headers.common["Access-Token"],
-  };
-
   useEffect(()=> {
-    window.addEventListener("unload", disconnect);
-    return () => {
-      window.removeEventListener("unload", disconnect);
-    }
-  }, []);
-
-  useEffect(() => {
     const Sock = new SockJS(process.env.REACT_APP_WEB_SOCKET_URL);
     const client = over(Sock);
+    client.heartbeat.outgoing = 20000;
+    client.heartbeat.incoming = 0;
     // client.debug = () => {};
     setStompClient(client);
-  }, [currentUser]);
+  }, []);
 
-  const onChatMessageReceived = (received) => {
-    const parsedMsg = JSON.parse(received.body);
-    setChat((chat) => {
-      return [...chat, parsedMsg];
-    });
-  };
-  
+
   const color = (seatNum, receivedColor) => {
     setSeats((oldSeats) => {
       let newSeats = [...oldSeats];
@@ -70,33 +51,21 @@ export const useStompConnection = (room, currentUser, setState) => {
     if (stompClient) {
       const onConnected = () => {
         setIsConnected(true);
-        const roomSub = stompClient.subscribe(`/topic/classroom/${roomId}`, onMessageReceived, tokenHeader);
+        const roomSub = stompClient.subscribe(`/topic/classroom/${roomId}`, onMessageReceived);
         setRoomSubscription(roomSub);
-        // const queueSubscription = stompClient.subscribe(
         const queueSub = stompClient.subscribe(
           `/queue/temp/classroom/${roomId}/member/${currentUser.id}`,
-          (received) => {
-            const classroomInfo = JSON.parse(received.body);
-            seatNumRef.current = classroomInfo.seatNum;
-            // const newRow = parseInt(classroomInfo.seatNum / columnNum) + 1; 
-            // setRow(newRow);  
-            rowRef.current = parseInt(classroomInfo.seatNum / columnNum) + 1;
-            setSeats((oldSeats) => {
-              let newSeats = [...oldSeats];
-              for (let seatNum in classroomInfo.classRoomStates) {
-                newSeats[seatNum - 1] = classroomInfo.classRoomStates[seatNum];
-              }
-              return newSeats;
-            });
-          },
-          tokenHeader
+          onQueueMessageReceived
         );
         setQueueSubscription(queueSub);
         
       };
       
       stompClient.connect(
-        tokenHeader,
+        {
+          "roomId": roomId,
+          "Access-Token": axios.defaults.headers.common["Access-Token"]
+        },
         onConnected,
         (error) => {
           console.error(error);
@@ -106,39 +75,52 @@ export const useStompConnection = (room, currentUser, setState) => {
     }
   }, [stompClient]);
 
-  useEffect(() => {
-    if (queueSubscription) {
-      setChatSubsription((_) => {
-        const subscription = stompClient.subscribe(
-          `/topic/classroom/${roomId}/chat/${rowRef.current}`,
-          onChatMessageReceived,
-          tokenHeader
-        );
-        stompClient.send(
-          `/topic/classroom/${roomId}/chat/${rowRef.current}`,
-          tokenHeader,
-          JSON.stringify({
-            type: EVENT.ENTER,
-            seatNum: seatNumRef.current,
-            row: rowRef.current,
-            content: null,
-          })
-        );
-        return subscription;
-      });
+  const onQueueMessageReceived = (received) => {
+    const classroomInfo = JSON.parse(received.body);
+    seatNumRef.current = classroomInfo.seatNum;
+    rowRef.current = parseInt(classroomInfo.seatNum / columnNum) + 1;
+    
+    setSeats((oldSeats) => {
+      let newSeats = [...oldSeats];
+      for (let seatNum in classroomInfo.classRoomStates) {
+        newSeats[seatNum - 1] = classroomInfo.classRoomStates[seatNum];
+      }
+      return newSeats;
+    });
+    
+    stompClient.send(
+      `/topic/classroom/${roomId}`,
+      {},
+      JSON.stringify({
+        type: EVENT.ENTER,
+        seatNum: seatNumRef.current,
+        content: null,
+      })
+    );
+
+    setChatSubscription(() => {
+      const subscription = stompClient.subscribe(
+        `/topic/classroom/${roomId}/chat/${rowRef.current}`,
+        onChatMessageReceived
+      );
 
       stompClient.send(
-        `/topic/classroom/${roomId}`,
-        tokenHeader,
+        `/topic/classroom/${roomId}/chat/${rowRef.current}`,
+        {},
         JSON.stringify({
           type: EVENT.ENTER,
           seatNum: seatNumRef.current,
-          content: null,
+          row: rowRef.current,
+          sender: currentUser.id
         })
       );
-    }
-  }, [queueSubscription]);
-
+      return subscription;
+    });
+    setQueueSubscription((subscription) => {
+      subscription.unsubscribe();
+      return null;
+    })
+  }
 
   const onMessageReceived = (received) => {
     const parsedMsg = JSON.parse(received.body);
@@ -156,54 +138,53 @@ export const useStompConnection = (room, currentUser, setState) => {
         color(parsedMsg.seatNum, "empty");
         break;
         case EVENT.CHANGE_SEAT:
+          const newSeatNum = parseInt(parsedMsg.message);
+          const prevSeatNum = parsedMsg.seatNum
+          
           setSeats((oldSeats) => {
             let newSeats = [...oldSeats];
-            newSeats[parseInt(parsedMsg.message) - 1] = oldSeats[parsedMsg.seatNum - 1];
-            newSeats[parsedMsg.seatNum - 1] = ["empty", ""];
+            newSeats[newSeatNum - 1] = oldSeats[prevSeatNum - 1];
+            newSeats[prevSeatNum - 1] = ["empty", ""];
             return newSeats;
           });
-          if (parsedMsg.seatNum === seatNumRef.current) {
-            const prevSeatNum = seatNumRef.current;
-            const newSeatNum = parseInt(parsedMsg.message);
+          const mySeatNum = seatNumRef.current;
+
+          if (prevSeatNum === mySeatNum) {
             const prevRow = rowRef.current;
             const newRow = parseInt(newSeatNum / columnNum) + 1;
-
-            if (newRow !== prevRow) { // 다른 줄
+            if (newRow !== prevRow) { 
               stompClient.send(
                 `/topic/classroom/${roomId}/chat/${rowRef.current}`,
-                tokenHeader,
+                {},
                 JSON.stringify({
                   type: EVENT.EXIT,
-                  seatNum: prevSeatNum,
-                  content: null,
+                  seatNum: mySeatNum,
+                  sender: currentUser.id
                 })
               );
-              setChat([]);
-              chatSubscription.unsubscribe();
-              
-              setChatSubsription((_) => {
+              setChatSubscription((prevSubscription) => {
+                prevSubscription.unsubscribe();
                 const subscription = stompClient.subscribe(
                   `/topic/classroom/${roomId}/chat/${newRow}`,
-                  onChatMessageReceived,
-                  tokenHeader
+                  onChatMessageReceived
                 );
                 stompClient.send(
                   `/topic/classroom/${roomId}/chat/${newRow}`,
-                  tokenHeader,
+                  {},
                   JSON.stringify({
                     type: EVENT.ENTER,
                     seatNum: newSeatNum,
                     row: newRow,
-                    content: null,
+                    sender: currentUser.id
                   })
                 );
                 
                 return subscription;
               });
-            } else { // 같은 줄
+            } else { 
               setChat((chat) => {
                 chat.forEach((message) => {
-                  if (message.seatNum === prevSeatNum) {
+                  if (message.seatNum === mySeatNum) {
                     message.seatNum = newSeatNum;
                   }
                 });
@@ -213,37 +194,23 @@ export const useStompConnection = (room, currentUser, setState) => {
             rowRef.current = newRow;
             seatNumRef.current = newSeatNum;
           }
-          break;
-      case EVENT.CHECK:
-        console.log("check");
         break;
       default:
         console.error("Unexpected message.");
     }
   };
 
-  const check = useCallback(
-    () => {
-    // stompClient.send(
-    //   `/topic/classroom/${roomId}`,
-    //   tokenHeader,
-    //   JSON.stringify({
-    //     type: EVENT.CHECK,
-    //     roomId: roomId
-    //   })
-    // );
-  }, [stompClient]);
-  
-  const { isIdle } = useIdleTimer({
-    onIdle: check,
-    timeout: 3_000
-  });
+  const onChatMessageReceived = (received) => {
+    const parsedMsg = JSON.parse(received.body);
+    setChat((chat) => [...chat, parsedMsg]);
+  };
+
   
   const selectColor = useCallback(
     (color) => {
       stompClient.send(
         `/topic/classroom/${roomId}`,
-        tokenHeader,
+        {},
         JSON.stringify({
           type: EVENT.COLOR,
           roomId: roomId,
@@ -259,7 +226,7 @@ export const useStompConnection = (room, currentUser, setState) => {
     (emoji) => {
       stompClient.send(
         `/topic/classroom/${roomId}`,
-        tokenHeader,
+        {},
         JSON.stringify({
           type: EVENT.DRAW_EMOJI,
           roomId: roomId,
@@ -273,10 +240,9 @@ export const useStompConnection = (room, currentUser, setState) => {
 
   const changeSeat = useCallback(
     (seatNum) => {
-      
       stompClient.send(
         `/topic/classroom/${roomId}`,
-        tokenHeader,
+        {},
         JSON.stringify({
           type: EVENT.CHANGE_SEAT,
           roomId: roomId,
@@ -284,7 +250,6 @@ export const useStompConnection = (room, currentUser, setState) => {
           seatNum: seatNumRef.current,
         })
       );
-      
     },
     [stompClient, seatNumRef, chatSubscription]
   );
@@ -293,22 +258,26 @@ export const useStompConnection = (room, currentUser, setState) => {
     (message) => {
       stompClient.send(
         `/topic/classroom/${roomId}/chat/${rowRef.current}`,
-        tokenHeader,
+        {},
         JSON.stringify({
           type: EVENT.TALK,
           seatNum: seatNumRef.current,
+          sender: currentUser.id,
           content: message,
+          sentTime: getCurrentTime()
         })
       );
     },
-    [stompClient, seatNumRef, rowRef.current]
+    [stompClient, seatNumRef, rowRef]
   );
-
+  
   const disconnect = useCallback(() => {
     if (stompClient !== null) {
+      roomSubscription.unsubscribe();
+      chatSubscription.unsubscribe();
       stompClient.send(
         `/topic/classroom/${roomId}`,
-        tokenHeader,
+        {},
         JSON.stringify({
           type: EVENT.EXIT,
           seatNum: seatNumRef.current,
@@ -317,7 +286,7 @@ export const useStompConnection = (room, currentUser, setState) => {
       );
       stompClient.disconnect();
     }
-  }, [stompClient, seatNumRef]);
+  }, [stompClient, seatNumRef, roomSubscription, chatSubscription]);
  
   const actions = {
     selectColor,
@@ -327,6 +296,17 @@ export const useStompConnection = (room, currentUser, setState) => {
     disconnect,
   }
 
+  const getCurrentTime = () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+
+    const ampm = currentHour < 12 ? '오전' : '오후';
+    let formattedHour = currentHour % 12;
+    formattedHour = formattedHour === 0 ? 12 : formattedHour;
+    const formattedTime = `${ampm} ${formattedHour < 10 ? '0' : ''}${formattedHour}:${currentMinute < 10 ? '0' : ''}${currentMinute}`;
+    return formattedTime;
+  }
   
   return { seatNumRef, isConnected, actions };
 };
