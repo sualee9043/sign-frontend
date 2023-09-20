@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import axios from "axios";
 import { createBrowserHistory } from "history";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper";
@@ -53,18 +53,40 @@ const InitDataFetcher = ({ children }) => {
 function Room({ currentUser, roomInfo }) {
   const params = useParams();
   const roomId = parseInt(params.roomId);
+  
+  const navigate = useNavigate();
   const history = createBrowserHistory();
   const column = roomInfo["capacity"] > 50 ? 10 : 5;
   const [visible, setVisible] = useState(false);
   const [seats, setSeats] = useState(new Array(roomInfo["capacity"]).fill(["empty", ""]));
   const [chat, setChat] = useState([]);
   const previousEmoji = useRef("");
+
+  const room = {
+    roomId: roomId,
+    columnNum: column
+  };
+
+  const setState = {
+    setSeats: setSeats,
+    setChat: setChat
+  };
+
+  const  { seatNumRef, isConnected, actions } =
+    useStompConnection(room, currentUser, setState);
+
   
-  const { seatNumRef, selectColor, changeSeat, sendMessage, selectEmoji, disconnect } =
-    useStompConnection(roomId, column, currentUser, setSeats, setChat);
+  const {selectColor, changeSeat, sendMessage, selectEmoji, disconnect} = actions;
+  
   const openChatroom = () => {
     setVisible((visible) => !visible);
   };
+
+  useEffect(() => {
+    if (isConnected === false) {
+      navigate("/home");
+    }
+  }, [isConnected]);
 
   useEffect(() => {
     history.listen(() => {
@@ -72,9 +94,11 @@ function Room({ currentUser, roomInfo }) {
         disconnect();
       }
     });
-  }, [disconnect]);
 
-  return (
+  }, []);
+
+
+  return isConnected !== null? (
     <div className={styles.wrapper}>
       <NavBar
         mode="classroom"
@@ -134,7 +158,7 @@ function Room({ currentUser, roomInfo }) {
         ></Chatroom>
       </div>
     </div>
-  );
+  ) : null;
 }
 
 const ClassRoom = () => {
