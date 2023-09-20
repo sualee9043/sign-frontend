@@ -75,13 +75,13 @@
 }
 
 .size-5.unselected {
-  border: solid 3px white;
+  border: solid 3px #e3e3e3;
   width: 54px;
   height: 54px;
 }
 
 .size-10.unselected {
-  border: solid 2px white;
+  border: solid 2px #e3e3e3;
   width: 26px;
   height: 26px;
 }
