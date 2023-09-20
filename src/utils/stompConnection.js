@@ -4,14 +4,14 @@ import axios from "axios";
 import { over } from "stompjs";
 import SockJS from "sockjs-client";
 
-import { EVENT } from "./classroomUtils";
+import { EVENT, getCurrentTime } from "./classroomUtils";
 
 
 export const useStompConnection = (room, currentUser, setState) => {
   const [stompClient, setStompClient] = useState(null);
   const [roomSubscription, setRoomSubscription] = useState(null);
   const [chatSubscription, setChatSubscription] = useState(null);
-  const [queueSubscription, setQueueSubscription] = useState(null);
+  const [_, setQueueSubscription] = useState(null);
   const [isConnected, setIsConnected] = useState(null);
 
   const navigate = useNavigate();
@@ -26,8 +26,9 @@ export const useStompConnection = (room, currentUser, setState) => {
     const client = over(Sock);
     client.heartbeat.outgoing = 20000;
     client.heartbeat.incoming = 0;
-    // client.debug = () => {};
+    client.debug = () => {};
     setStompClient(client);
+    
   }, []);
 
 
@@ -205,7 +206,6 @@ export const useStompConnection = (room, currentUser, setState) => {
     setChat((chat) => [...chat, parsedMsg]);
   };
 
-  
   const selectColor = useCallback(
     (color) => {
       stompClient.send(
@@ -296,17 +296,6 @@ export const useStompConnection = (room, currentUser, setState) => {
     disconnect,
   }
 
-  const getCurrentTime = () => {
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
 
-    const ampm = currentHour < 12 ? '오전' : '오후';
-    let formattedHour = currentHour % 12;
-    formattedHour = formattedHour === 0 ? 12 : formattedHour;
-    const formattedTime = `${ampm} ${formattedHour < 10 ? '0' : ''}${formattedHour}:${currentMinute < 10 ? '0' : ''}${currentMinute}`;
-    return formattedTime;
-  }
-  
   return { seatNumRef, isConnected, actions };
 };
