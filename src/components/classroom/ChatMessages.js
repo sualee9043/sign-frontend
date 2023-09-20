@@ -20,30 +20,11 @@ function ChatMessages({ chat, stateRef }) {
       {chat.map((data, index) => {
         switch (data.type) {
           case EVENT.ENTER:
-            return (
-              <div key={index} className={styles.announcWrapper}>
-                {data.sender === currentUser.username ? (
-                  <div>
-                    {index !== 0 ? <hr></hr> : null}
-                    <span>{data.row}번째 줄 대화방</span>
-                    <br></br>
-                  </div>
-                ) : null}
-                <span className={styles.announcement}>{data.seatNum}번 좌석님이 들어왔습니다.</span>
-              </div>
-            );
+            return <EnterMessage key={index} data={data} currentUser={currentUser} index={index}></EnterMessage>; 
           case EVENT.EXIT:
-            return (
-              <div key={index} className={styles.announcWrapper}>
-                <span className={styles.announcement}>{data.seatNum}번 좌석님이 나갔습니다.</span>
-              </div>
-            );
+            return <ExitMessage key={index} data={data} index={index}></ExitMessage>;
           case EVENT.TALK:
-            return stateRef.current === data.seatNum ? (
-              <Message key={index} myMessage={true} data={data}></Message>
-            ) : (
-              <Message key={index} myMessage={false} data={data}></Message>
-            );
+            return <TalkMessage key={index} data={data} isMyMessage={currentUser.id === data.sender}></TalkMessage>; 
           default:
             return null;
         }
@@ -53,3 +34,31 @@ function ChatMessages({ chat, stateRef }) {
 }
 
 export default ChatMessages;
+
+function EnterMessage({data, currentUser, index}) {
+  
+  return (
+    <div className={styles.announcWrapper}>
+      {data.sender === currentUser.id ? (
+        <div>
+          {index !== 0 ? <hr></hr> : null}
+          <span>{data.row}번째 줄 대화방</span>
+          <br></br>
+        </div>
+      ) : null}
+      <span className={styles.announcement}>{data.seatNum}번 좌석님이 들어왔습니다.</span>
+    </div>
+  );
+}
+
+function ExitMessage({data, index}) {
+  return (
+    <div key={index} className={styles.announcWrapper}>
+      <span className={styles.announcement}>{data.seatNum}번 좌석님이 나갔습니다.</span>
+    </div>
+  );
+}
+
+function TalkMessage({data, isMyMessage}) {
+  return <Message myMessage={isMyMessage} data={data}></Message>
+}
