@@ -16,13 +16,11 @@ function ChatInputBar({ sendMessage }) {
 
   return (
     <form onSubmit={handleSubmit}>
-    <div className={styles.inputBar}>
-      
+    <div className={styles.wrapper}>
         <input className={styles.input} ref={messageRef} />
         <button className={styles.button} type="submit">
           전송
         </button>
-      
     </div>
     </form>
   );

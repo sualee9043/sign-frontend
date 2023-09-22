@@ -18,3 +18,7 @@
   padding: 0 20px 0 20px;
   border: none;
 }
+
+.wrapper {
+  display: flex;
+}
