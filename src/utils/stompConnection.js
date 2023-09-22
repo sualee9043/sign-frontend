@@ -24,8 +24,6 @@ export const useStompConnection = (room, currentUser, setState) => {
   useEffect(()=> {
     const Sock = new SockJS(process.env.REACT_APP_WEB_SOCKET_URL);
     const client = over(Sock);
-    client.heartbeat.outgoing = 20000;
-    client.heartbeat.incoming = 0;
     client.debug = () => {};
     setStompClient(client);
     
