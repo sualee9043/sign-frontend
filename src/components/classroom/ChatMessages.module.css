@@ -1,15 +1,15 @@
-.msgContainer {
+.message-container {
   height: 85%;
   overflow-y: scroll;
   padding: 0px;
   margin-top: 0px;
 }
 
-.msgContainer hr {
+.message-container hr {
   border: 1px solid rgba(255, 255, 255, 0.219);
 }
 
-.announcWrapper {
+.announcement-wrapper {
   padding: 15px 0;
 }
 
@@ -19,5 +19,9 @@
   border-radius: 5px;
   padding: 0 13px 0 15px;
   color: white;
+  margin-bottom: 20px;
+}
+
+.chatroom-name {
   margin-bottom: 20px;
 }

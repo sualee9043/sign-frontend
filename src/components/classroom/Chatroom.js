@@ -4,10 +4,10 @@ import ChatInputBar from "./ChatInputBar";
 import styles from "./Chatroom.module.css";
 
 
-function Chatroom({ visible, chat, stateRef, sendMessage }) {
+function Chatroom({ visible, chat, sendMessage }) {
   return (
     <div className={visible ? styles.chatroom : styles.hidden}>
-      <ChatMessages chat={chat} stateRef={stateRef} />
+      <ChatMessages chat={chat} />
       <ChatInputBar sendMessage={sendMessage} />
     </div>
   );

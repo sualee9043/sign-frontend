@@ -7,7 +7,7 @@ import { EVENT } from "../../utils/classroomUtils";
 import styles from "./ChatMessages.module.css";
 
 
-function ChatMessages({ chat, stateRef }) {
+function ChatMessages({ chat }) {
   const { currentUser } = useContext(CurrentUserContext);
   const scrollRef = useRef();
 
@@ -16,7 +16,7 @@ function ChatMessages({ chat, stateRef }) {
   }, [chat]);
 
   return (
-    <ul className={styles.msgContainer} ref={scrollRef}>
+    <ul className={styles["message-container"]} ref={scrollRef}>
       {chat.map((data, index) => {
         switch (data.type) {
           case EVENT.ENTER:
@@ -38,9 +38,9 @@ export default ChatMessages;
 function EnterMessage({data, currentUser, index}) {
   
   return (
-    <div className={styles.announcWrapper}>
+    <div className={styles["announcement-wrapper"]}>
       {data.sender === currentUser.id ? (
-        <div>
+        <div className={styles["chatroom-name"]}>
           {index !== 0 ? <hr></hr> : null}
           <span>{data.row}번째 줄 대화방</span>
           <br></br>
@@ -53,7 +53,7 @@ function EnterMessage({data, currentUser, index}) {
 
 function ExitMessage({data, index}) {
   return (
-    <div key={index} className={styles.announcWrapper}>
+    <div key={index} className={styles["announcement-wrapper"]}>
       <span className={styles.announcement}>{data.seatNum}번 좌석님이 나갔습니다.</span>
     </div>
   );
