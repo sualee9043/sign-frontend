@@ -26,7 +26,6 @@ export const useStompConnection = (room, currentUser, setState) => {
     const client = over(Sock);
     client.debug = () => {};
     setStompClient(client);
-    
   }, []);
 
 
@@ -102,7 +101,7 @@ export const useStompConnection = (room, currentUser, setState) => {
         `/topic/classroom/${roomId}/chat/${rowRef.current}`,
         onChatMessageReceived
       );
-
+      console.log("chat: ", `/topic/classroom/${roomId}/chat/${rowRef.current}`)
       stompClient.send(
         `/topic/classroom/${roomId}/chat/${rowRef.current}`,
         {},
