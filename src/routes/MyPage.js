@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { authApiInstance } from "../utils/api";
 
 import NavBar from "../components/NavBar.js";
 
@@ -9,11 +9,11 @@ import { CurrentUserContext } from "../contexts/CurrentUserContext";
 
 
 function MyPage() {
-  const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
+  const { setCurrentUser } = useContext(CurrentUserContext);
   const navigate = useNavigate();
   const logout = async () => {
     try {
-      await axios.post("/member/logout");
+      await authApiInstance.post("/member/logout");
       setCurrentUser(null);
       navigate("/");
     } catch (error) {
@@ -23,8 +23,8 @@ function MyPage() {
 
   const unregister = async () => {
     try {
-      await axios.post("/member/logout");
-      await axios.delete(`/member`);
+      await authApiInstance.post("/member/logout");
+      await authApiInstance.delete(`/member`);
       setCurrentUser(null);
       navigate("/");
     } catch (error) {

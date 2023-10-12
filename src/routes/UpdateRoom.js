@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useFormik } from "formik";
-import axios from "axios";
 import Button from "@mui/material/Button";
 import { ThemeProvider } from "@mui/material/styles";
 
 import NavBar from "../components/NavBar";
 
+import { authApiInstance } from "../utils/api";
 import { roomNameSchema } from "../schemas/CreateRoomSchema";
 import theme from "../utils/theme";
 import styles from "./RoomForm.module.css";
@@ -28,7 +28,7 @@ function UpdateRoom({}) {
   const updateRoomName = async (values) => {
     if (roomInfo.roomName !== values.roomName) {
       try {
-        await axios.put(`/classroom/${roomInfo.id}`, {
+        await authApiInstance.put(`/classroom/${roomInfo.id}`, {
           roomName: values.roomName,
         });
         navigate("/home");
@@ -106,7 +106,7 @@ function ConfirmMessage({ roomId, visible, setVisible }) {
   };
   const deleteRoom = async () => {
     try {
-      await axios.delete(`/classroom/${roomId}`);
+      await authApiInstance.delete(`/classroom/${roomId}`);
       navigate("/home");
     } catch (error) {
       console.error("There has been an error", error);

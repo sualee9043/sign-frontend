@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { authApiInstance } from "../utils/api";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../utils/theme";
 
@@ -21,7 +21,7 @@ function EnterRoom() {
 
   const findRoomByRoomcode = async () => {
     try {
-      const response = await axios.get(`/classrooms`, { params: { code: roomCode } });
+      const response = await authApiInstance.get(`/classrooms`, { params: { code: roomCode } });
       const result = response.data;
       setErrorMessage(null);
       setFoundRoom(result);
@@ -36,7 +36,7 @@ function EnterRoom() {
 
   const enterRoom = async () => {
     try {
-      await axios.put(`/member/${currentUser.id}/classroom/${foundRoom["id"]}`);
+      await authApiInstance.put(`/member/${currentUser.id}/classroom/${foundRoom["id"]}`);
       navigate("/home");
     } catch (error) {
       if (error.response && error.response.status === 409) {

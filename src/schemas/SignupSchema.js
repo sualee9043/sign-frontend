@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-import axios from "axios";
+import { authApiInstance } from "../utils/api";
 
 const usernameSchema = Yup.string()
   .required("이름을 입력하세요.")
@@ -25,7 +25,7 @@ export const validationSchema = (hasChange, validationResult) =>
       if (hasChange.current) {
         if (await emailSchema.isValid(email)) {
           try {
-            await axios.get(`/members/email/${email}/duplication`);
+            await authApiInstance.get(`/members/email/${email}/duplication`);
             validationResult.current = true;
             return true;
           } catch (error) {

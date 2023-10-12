@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
-import axios from "axios";
+import { authApiInstance } from "../utils/api";
 import { createBrowserHistory } from "history";
 import { useParams, useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -28,14 +28,14 @@ const InitDataFetcher = ({ children }) => {
   const [roomInfo, setRoomInfo] = useState(null);
   useEffect(() => {
     if (!currentUser) {
-      axios
+      authApiInstance
         .get("/member")
         .then((response) => setCurrentUser(response.data))
         .catch((error) => {
           console.error("Error fetching data:", error);
         });
     }
-    axios
+    authApiInstance
       .get(`/classroom/${roomId}`)
       .then((response) => setRoomInfo(response.data))
       .catch((error) => {
@@ -153,7 +153,6 @@ function Room({ currentUser, roomInfo }) {
         <Chatroom
           visible={visible}
           chat={chat}
-          stateRef={seatNumRef}
           sendMessage={sendMessage}
         ></Chatroom>
       </div>

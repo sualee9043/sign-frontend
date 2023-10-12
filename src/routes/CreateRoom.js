@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import axios from "axios";
+import { authApiInstance } from "../utils/api";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 
@@ -30,7 +30,7 @@ function CreateRoom() {
 
   const createRoom = async (values) => {
     try {
-      await axios.post("/classrooms", values);
+      await authApiInstance.post("/classrooms", values);
       navigate("/home");
     } catch (error) {
       console.error("There has been an error login");

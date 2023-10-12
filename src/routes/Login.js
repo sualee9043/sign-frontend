@@ -1,13 +1,19 @@
 import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { axiosInstance, authApiInstance } from "../utils/api";
 
 import Logo from "../logo_big.svg";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import styles from "./Login.module.css";
 
 
+
 function Login() {
+  const login = async (provider) => {
+    const response = await axiosInstance.get(`/oauth2/authorization/${provider}`);
+    console.log(response);
+  };
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setMessage] = useState("");
@@ -16,12 +22,12 @@ function Login() {
 
   const handleClick = async () => {
     try {
-      const response = await axios.post("/member/login", {
+      const response = await axiosInstance.post("/member/login", {
         email: email,
         password: password,
       });
       const headers = response.headers;
-      axios.defaults.headers.common["Access-Token"] = headers["access-token"];
+      authApiInstance.defaults.headers.common["Access-Token"] = headers["access-token"];
       getUser().then(() => {
         navigate("/home");
       });
@@ -32,7 +38,7 @@ function Login() {
 
   const getUser = async () => {
     try {
-      const response = await axios.get("/member");
+      const response = await authApiInstance.get("/member");
       const userInfo = response.data;
       setCurrentUser(userInfo);
     } catch (error) {
@@ -78,12 +84,12 @@ function Login() {
             로그인
           </button>
           <br></br>
-          <button onClick={null} className={`${styles["login-button"]} ${styles["login-google"]}`}>
+          <button className={`${styles["login-button"]} ${styles["login-google"]}`}>
             <a
               href={`${process.env.REACT_APP_OAUTH_LOGIN_URL}/google`}
               className={styles["login-google"]}
             >
-              Google 로그인
+              구글 로그인
             </a>
           </button>
 

@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-import axios from "axios";
+import { authApiInstance } from "../utils/api";
 
 const roomCodeSchema = Yup.string()
   .required("입장 코드를 입력하세요.")
@@ -19,7 +19,7 @@ export const validationSchema = (hasChange, validationResult) =>
       if (hasChange.current) {
         if (await roomCodeSchema.isValid(code)) {
           try {
-            await axios.get(`/classrooms/code/${code}/duplication`);
+            await authApiInstance.get(`/classrooms/code/${code}/duplication`);
             validationResult.current = true;
             return true;
           } catch (error) {

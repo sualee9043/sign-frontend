@@ -1,21 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 
-import axios from "axios";
+// import axios from "axios";
 import App from "./App";
 import "./styles.css";
 import "./index.css";
 
-axios.defaults.baseURL = process.env.REACT_APP_API_URL;
-axios.defaults.withCredentials = true;
-axios.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Do something with the error, or simply suppress it
-    return Promise.reject(error);
-  }
-);
-// axios.defaults.validateStatus = false;
+// axios.defaults.baseURL = process.env.REACT_APP_API_URL;
+// axios.defaults.withCredentials = true;
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(

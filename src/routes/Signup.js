@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
-import axios from "axios";
+import { apiInstance } from "../utils/api";
 import Button from "@mui/material/Button";
 import { ThemeProvider } from "@mui/material/styles";
 
@@ -30,7 +30,7 @@ function Signup() {
 
   const handleClick = async (values) => {
     try {
-      await axios.post("/members", values);
+      await apiInstance.post("/members", values);
       navigate("/login");
     } catch (error) {
       if (error.response) {
