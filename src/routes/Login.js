@@ -27,7 +27,7 @@ function Login() {
         password: password,
       });
       const headers = response.headers;
-      authApiInstance.defaults.headers.common["Access-Token"] = headers["access-token"];
+      authApiInstance.defaults.headers.common["Authorization"] = headers["authorization"];
       getUser().then(() => {
         navigate("/home");
       });

@@ -62,7 +62,7 @@ export const useStompConnection = (room, currentUser, setState) => {
       stompClient.connect(
         {
           "roomId": roomId,
-          "Access-Token": axios.defaults.headers.common["Access-Token"]
+          "Authorization": axios.defaults.headers.common["authorization"]
         },
         onConnected,
         (error) => {

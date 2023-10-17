@@ -29,7 +29,7 @@ function OAuth2LoginHandler() {
       try {
         const response = await axiosInstance.get(`/login/oauth2/code/${provider}`, {params: {code: code}});
         const headers = response.headers;
-        authApiInstance.defaults.headers.common["Access-Token"] = headers["access-token"];
+        authApiInstance.defaults.headers.common["Authorization"] = headers["authorization"];
         getUser().then(() => {
           navigate("/home");
         });
