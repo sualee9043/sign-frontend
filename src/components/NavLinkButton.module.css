@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Rokkitt:wght@500&display=swap');
+
+
 .btn {
   display: inline-block;
   padding: 6px 20px;
@@ -34,6 +37,9 @@
 
 .start {
   background-color: #0289b1;
-  font-size: 40px;
+  font-size: 60px;
   font-weight: 500;
+  padding: 6px 40px 6px 40px;
+  border-radius: 30px;
+  font-family: 'Rokkitt', serif;
 }
