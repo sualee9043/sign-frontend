@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { authApiInstance } from "./api";
 import { over } from "stompjs";
 import SockJS from "sockjs-client";
 
@@ -62,7 +62,7 @@ export const useStompConnection = (room, currentUser, setState) => {
       stompClient.connect(
         {
           "roomId": roomId,
-          "Authorization": axios.defaults.headers.common["authorization"]
+          "Authorization": authApiInstance.defaults.headers.common["Authorization"]
         },
         onConnected,
         (error) => {
@@ -101,7 +101,6 @@ export const useStompConnection = (room, currentUser, setState) => {
         `/topic/classroom/${roomId}/chat/${rowRef.current}`,
         onChatMessageReceived
       );
-      console.log("chat: ", `/topic/classroom/${roomId}/chat/${rowRef.current}`)
       stompClient.send(
         `/topic/classroom/${roomId}/chat/${rowRef.current}`,
         {},
