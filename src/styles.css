@@ -1,5 +1,7 @@
+
 * {
   font-family: "IBM Plex Sans KR", sans-serif;
+  
 }
 
 a {
@@ -24,7 +26,7 @@ a:hover {
 
 body {
   text-align: center;
-  background: rgb(48, 48, 48);
+  background: rgb(26, 26, 26);
   color: white;
   margin: auto;
   height: 100vh;
