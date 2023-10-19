@@ -16,7 +16,7 @@ import UpdateRoom from "./routes/UpdateRoom";
 
 const App = () => {
   return (
-    <BrowserRouter basename="/sign">
+    <BrowserRouter>
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/home" element={<Home />} />
