@@ -18,9 +18,11 @@ function ChatInputBar({ sendMessage }) {
     <form onSubmit={handleSubmit}>
     <div className={styles.wrapper}>
         <input className={styles.input} ref={messageRef} />
-        <button className={styles.button} type="submit">
-          전송
-        </button>
+        <div>
+          <button className={styles.button} type="submit">
+            전송
+          </button>
+        </div>
     </div>
     </form>
   );
