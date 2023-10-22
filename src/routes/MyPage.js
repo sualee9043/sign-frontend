@@ -14,6 +14,7 @@ function MyPage() {
   const logout = async () => {
     try {
       await authApiInstance.post("/member/logout");
+      authApiInstance.defaults.headers.common["Authorization"] = null;
       setCurrentUser(null);
       navigate("/");
     } catch (error) {
