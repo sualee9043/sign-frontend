@@ -12,11 +12,13 @@ import CreateRoom from "./routes/CreateRoom";
 import EnterRoom from "./routes/EnterRoom";
 import MyPage from "./routes/MyPage";
 import UpdateRoom from "./routes/UpdateRoom";
+import AuthInterceptor from "./utils/api";
 
 
 const App = () => {
   return (
     <BrowserRouter>
+      <AuthInterceptor />
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/home" element={<Home />} />
