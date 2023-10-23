@@ -5,15 +5,10 @@ import { axiosInstance, authApiInstance } from "../utils/api";
 import Logo from "../logo_big.svg";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import styles from "./Login.module.css";
-
+import { extractToken } from "../utils/tokenUtils";
 
 
 function Login() {
-  const login = async (provider) => {
-    const response = await axiosInstance.get(`/oauth2/authorization/${provider}`);
-    console.log(response);
-  };
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setMessage] = useState("");
