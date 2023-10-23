@@ -1,21 +1,15 @@
+import { useContext } from "react";
 import axios from 'axios'
+import { useNavigate } from "react-router-dom";
+
+import { CurrentUserContext } from "../contexts/CurrentUserContext";
+import { extractToken } from "./tokenUtils";
+
 
 export const axiosInstance = axios.create({
     baseURL: process.env.REACT_APP_API_BASE_URL,
     withCredentials: true
 });
-
-axiosInstance.interceptors.response.use(
-    function (response) {
-        if (response.headers.getAuthorization()) {
-            authApiInstance.defaults.headers.common["Authorization"] = response.headers.getAuthorization();
-        }
-        return response;
-    },
-    async function (error) {
-        return error;
-    }
-);
 
 export const apiInstance = axios.create({
     baseURL: process.env.REACT_APP_API_URL,
@@ -27,14 +21,37 @@ export const authApiInstance = axios.create({
     withCredentials: true
 });
 
-authApiInstance.interceptors.response.use(
-    function (response) {
-        if (response.headers.getAuthorization()) {
-            authApiInstance.defaults.headers.common["Authorization"] = response.headers.getAuthorization();
+function AuthInterceptor() {
+    const { setCurrentUser } = useContext(CurrentUserContext);
+    const navigate = useNavigate();
+
+    authApiInstance.interceptors.response.use(
+        function (response) {
+            return response;
+        },
+        async function (error) {
+            if (error.response.status === 401) {
+                try {
+                    const tokenResponse = await authApiInstance.post('/refresh/access-token');
+                    const newAccessToken = extractToken(tokenResponse.headers["authorization"]);
+                    setCurrentUser((currentUser) => ({ 
+                        ...currentUser, 
+                        accessToken: newAccessToken
+                    }));
+
+                    const updatedConfig = { ...error.config };
+                    updatedConfig.headers.Authorization = `Bearer ${newAccessToken}`;
+                    const secondResponse = await authApiInstance(updatedConfig);
+                    return secondResponse;
+                } catch (refreshError) {
+                    navigate("/login");
+                }
+            }
+            return error;
         }
-        return response;
-    },
-    async function (error) {
-        return error;
-    }
-);
+    );
+
+    return null;
+}
+
+export default AuthInterceptor;
