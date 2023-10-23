@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useContext, useRef } from "react";
 import { authApiInstance } from "../utils/api";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
@@ -6,11 +6,13 @@ import { useFormik } from "formik";
 import NavBar from "../components/NavBar.js";
 
 import { validationSchema } from "../schemas/CreateRoomSchema";
+import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import button_styles from "../components/Button.module.css";
 import styles from "./RoomForm.module.css";
 
 
 function CreateRoom() {
+  const { currentUser } = useContext(CurrentUserContext);
   const [name, setName] = useState("");
   const hasChange = useRef(false);
   const validationResult = useRef(false);
@@ -23,14 +25,18 @@ function CreateRoom() {
       capacity: "",
     },
     validateOnMount: true,
-    validationSchema: validationSchema(hasChange, validationResult),
+    validationSchema: validationSchema(hasChange, validationResult, currentUser),
     validateOnChange: false,
     validateOnBlur: true,
   });
 
   const createRoom = async (values) => {
     try {
-      await authApiInstance.post("/classrooms", values);
+      await authApiInstance.post("/classrooms", values, {
+        headers: {
+          Authorization: `Bearer ${currentUser.accessToken}`
+        }
+      });
       navigate("/home");
     } catch (error) {
       console.error("There has been an error login");

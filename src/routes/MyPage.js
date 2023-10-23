@@ -9,11 +9,16 @@ import { CurrentUserContext } from "../contexts/CurrentUserContext";
 
 
 function MyPage() {
-  const { setCurrentUser } = useContext(CurrentUserContext);
+  const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
   const navigate = useNavigate();
   const logout = async () => {
     try {
-      await authApiInstance.post("/member/logout");
+      await authApiInstance.post("/logout",
+      {
+        headers: {
+          Authorization: `Bearer ${currentUser.accessToken}`
+        }
+      });
       setCurrentUser(null);
       navigate("/");
     } catch (error) {
@@ -23,8 +28,16 @@ function MyPage() {
 
   const unregister = async () => {
     try {
-      await authApiInstance.post("/member/logout");
-      await authApiInstance.delete(`/member`);
+      await authApiInstance.post("/logout", {
+        headers: {
+          Authorization: `Bearer ${currentUser.accessToken}`
+        }
+      });
+      await authApiInstance.delete(`/member`, {
+        headers: {
+          Authorization: `Bearer ${currentUser.accessToken}`
+        }
+      });
       setCurrentUser(null);
       navigate("/");
     } catch (error) {

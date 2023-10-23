@@ -1,6 +1,7 @@
 import * as Yup from "yup";
 import { authApiInstance } from "../utils/api";
 
+
 const roomCodeSchema = Yup.string()
   .required("입장 코드를 입력하세요.")
   .matches(
@@ -12,14 +13,19 @@ export const roomNameSchema = Yup.string()
   .min(2, "방 이름은 최소 2글자 이상입니다.")
   .max(30, "방 이름은 최대 30글자입니다.");
 
-export const validationSchema = (hasChange, validationResult) =>
+export const validationSchema = (hasChange, validationResult, currentUser) =>
   Yup.object().shape({
     name: roomNameSchema,
     code: roomCodeSchema.test("roomName", "사용 중인 입장 코드입니다.", async (code) => {
       if (hasChange.current) {
         if (await roomCodeSchema.isValid(code)) {
           try {
-            await authApiInstance.get(`/classrooms/code/${code}/duplication`);
+            await authApiInstance.get(`/classrooms/code/${code}/duplication`,
+            {
+              headers: {
+                Authorization: `Bearer ${currentUser.accessToken}`
+              }
+            });
             validationResult.current = true;
             return true;
           } catch (error) {

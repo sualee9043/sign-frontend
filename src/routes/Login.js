@@ -18,7 +18,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const [errorMsg, setMessage] = useState("");
   const navigate = useNavigate();
-  const { setCurrentUser } = useContext(CurrentUserContext);
+  const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
 
   const handleClick = async () => {
     try {
@@ -27,7 +27,10 @@ function Login() {
         password: password,
       });
       const headers = response.headers;
-      authApiInstance.defaults.headers.common["Authorization"] = headers["authorization"];
+      setCurrentUser((currentUser) => ({ 
+        ...currentUser, 
+        accessToken: extractToken(headers["authorization"]) 
+      }));
       getUser().then(() => {
         navigate("/home");
       });
@@ -38,7 +41,12 @@ function Login() {
 
   const getUser = async () => {
     try {
-      const response = await authApiInstance.get("/member");
+      const response = await authApiInstance.get("/member",
+      {
+        headers: {
+          Authorization: `Bearer ${currentUser.accessToken}`
+        }
+      });
       const userInfo = response.data;
       setCurrentUser(userInfo);
     } catch (error) {

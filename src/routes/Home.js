@@ -24,7 +24,12 @@ function Home() {
     
     async function getRooms() {
       try {
-        const response = await authApiInstance.get(`/member/${currentUser.id}/classrooms`);
+        const response = await authApiInstance.get(`/member/${currentUser.id}/classrooms`,
+        {
+          headers: {
+            Authorization: `Bearer ${currentUser.accessToken}`
+          }
+        });
         const roomsJson = response.data;
         setRooms(roomsJson);
       } catch (error) {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useFormik } from "formik";
 import Button from "@mui/material/Button";
@@ -10,8 +10,10 @@ import { authApiInstance } from "../utils/api";
 import { roomNameSchema } from "../schemas/CreateRoomSchema";
 import theme from "../utils/theme";
 import styles from "./RoomForm.module.css";
+import { CurrentUserContext } from "../contexts/CurrentUserContext";
 
 function UpdateRoom({}) {
+  const { currentUser } = useContext(CurrentUserContext);
   const [deleteClicked, setDeleteClicked] = useState(false);
   const location = useLocation();
   const roomInfo = location.state.roomInfo;
@@ -30,6 +32,11 @@ function UpdateRoom({}) {
       try {
         await authApiInstance.put(`/classroom/${roomInfo.id}`, {
           roomName: values.roomName,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${currentUser.accessToken}`
+          }
         });
         navigate("/home");
       } catch (error) {
@@ -100,13 +107,19 @@ function UpdateRoom({}) {
 }
 
 function ConfirmMessage({ roomId, visible, setVisible }) {
+  const { currentUser } = useContext(CurrentUserContext);
   const navigate = useNavigate();
   const cancel = () => {
     setVisible((visible) => !visible);
   };
   const deleteRoom = async () => {
     try {
-      await authApiInstance.delete(`/classroom/${roomId}`);
+      await authApiInstance.delete(`/classroom/${roomId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${currentUser.accessToken}`
+        }
+      });
       navigate("/home");
     } catch (error) {
       console.error("There has been an error", error);
