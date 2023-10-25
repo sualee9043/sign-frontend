@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import { apiInstance } from "../utils/api";
@@ -6,11 +6,13 @@ import Button from "@mui/material/Button";
 import { ThemeProvider } from "@mui/material/styles";
 
 import { validationSchema } from "../schemas/SignupSchema";
+import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import theme from "../utils/theme";
 import styles from "./Login.module.css";
 
 
 function Signup() {
+  const { currentUser } = useContext(CurrentUserContext);
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const hasChange = useRef(false);
@@ -22,7 +24,7 @@ function Signup() {
       password: "",
       password2: "",
     },
-    validationSchema: validationSchema(hasChange, validationResult),
+    validationSchema: validationSchema(hasChange, validationResult, currentUser),
     validateOnMount: true,
     validateOnChange: false,
     validateOnBlur: true,

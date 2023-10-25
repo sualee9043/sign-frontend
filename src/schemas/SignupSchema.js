@@ -18,14 +18,19 @@ const emailSchema = Yup.string()
     "이메일에 공백 문자, /, <. >, #, %, ', \", {, }, |, ~, [, ], `는 입력할 수 없습니다."
   );
 
-export const validationSchema = (hasChange, validationResult) =>
+export const validationSchema = (hasChange, validationResult, currentUser) =>
   Yup.object().shape({
     username: usernameSchema,
     email: emailSchema.test("email", "사용 중인 이메일입니다.", async (email) => {
       if (hasChange.current) {
         if (await emailSchema.isValid(email)) {
           try {
-            await authApiInstance.get(`/members/email/${email}/duplication`);
+            await authApiInstance.get(`/members/email/${email}/duplication`,
+            {
+              headers: {
+                Authorization: `Bearer ${currentUser.accessToken}`
+              }
+            });
             validationResult.current = true;
             return true;
           } catch (error) {

@@ -62,7 +62,7 @@ export const useStompConnection = (room, currentUser, setState) => {
       stompClient.connect(
         {
           "roomId": roomId,
-          "Authorization": authApiInstance.defaults.headers.common["Authorization"]
+          "Authorization": `Bearer ${currentUser.accessToken}`
         },
         onConnected,
         (error) => {

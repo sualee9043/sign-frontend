@@ -29,14 +29,22 @@ const InitDataFetcher = ({ children }) => {
   useEffect(() => {
     if (!currentUser) {
       authApiInstance
-        .get("/member")
+        .get("/member", {
+          headers: {
+            Authorization: `Bearer ${currentUser.accessToken}`
+          }
+        })
         .then((response) => setCurrentUser(response.data))
         .catch((error) => {
           console.error("Error fetching data:", error);
         });
     }
     authApiInstance
-      .get(`/classroom/${roomId}`)
+      .get(`/classroom/${roomId}`, {
+        headers: {
+          Authorization: `Bearer ${currentUser.accessToken}`
+        }
+      })
       .then((response) => setRoomInfo(response.data))
       .catch((error) => {
         console.error("Error fetching data:", error);
